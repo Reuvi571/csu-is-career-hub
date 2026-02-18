@@ -6,15 +6,35 @@
 * **Database**: PostgreSQL 16.
 * **Hosting**: Render (PaaS).
 
-## 2. Entity Relationship Diagram (ERD) Narrative
-### A. Users Table (`CustomUser`)
-* **PK**: `id` (UUID).
-* **Fields**: `email`, `role` (Enum: STUDENT, EMPLOYER, ADMIN).
+## 2. Data Model & Schema
+### 2.1 Schema Narrative
+* **Users (`CustomUser`)**: Handles authentication and roles (Student vs. Employer).
+* **Job Postings (`JobPosting`)**: Stores internship details linked to specific Employers.
+* **Applications (`JobApplication`)**: Connects a Student to a Job Posting with a status workflow.
 
-### B. Job Postings (`JobPosting`)
-* **FK**: `posted_by` (Link to Employer).
-* **Fields**: `title`, `description`, `status`.
+### 2.2 Entity Relationship Diagram (ERD)
+```mermaid
+erDiagram
+    User ||--o{ Application : submits
+    Employer ||--o{ JobPosting : creates
+    JobPosting ||--o{ Application : receives
 
-### C. Applications (`JobApplication`)
-* **FK**: `job_id`, `student_id`.
-* **Fields**: `status` (PENDING, REVIEW, REJECTED).
+    User {
+        UUID id PK
+        string email
+        string role "Student | Employer | Admin"
+    }
+
+    JobPosting {
+        UUID id PK
+        string title
+        string company
+        string location "Cleveland, OH"
+        string status "Open | Closed"
+    }
+
+    Application {
+        UUID id PK
+        date submitted_at
+        string status "Pending | Reviewed"
+    }

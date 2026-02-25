@@ -1,5 +1,5 @@
 # 🚀 Check-in #2: Deliverables
-> **[Click here to view the Live Figma Prototype](https://www.figma.com/make/aKdXgn82SvD5ejIlc0yl1V/CSU-IS-Career-Hub?fullscreen=1&t=OA2b7QVyDA5nReJM-1)**
+> **[Click here to view the Live Figma Prototype](https://www.figma.com/make/XIe5dlZwiEITLDxRsMPzP6/CSU-Internship-Platform?p=f&t=Zg0jlizb0Ya5HGIG-0)**
 > *Includes "Happy Path" for Student Job Search (Sherwin-Williams, GCP, Progressive).*
 
 ---

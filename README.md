@@ -1,8 +1,10 @@
 # 🚀 Check-in #2: Deliverables
-> **[Click here to view the Live Figma Prototype](https://www.figma.com/make/XIe5dlZwiEITLDxRsMPzP6/CSU-Internship-Platform?p=f&t=xczudFR0Pa6Zwk4C-0&fullscreen=1)**
-> *Includes "Happy Path" for Student Job Search (Sherwin-Williams, GCP, Progressive).*
 
----
+### 🎨 Figma Prototypes (A/B Testing)
+- > **Prototype Option A (Classic/Basic Theme):** [Click Here to View](https://www.figma.com/make/aKdXgn82SvD5ejIlc0yl1V/CSU-IS-Career-Hub?fullscreen=1&t=zxwc7STs1bvu4033-1)
+- > **Prototype Option B (Modern Gradient Theme):** [Click Here to View](https://www.figma.com/make/XIe5dlZwiEITLDxRsMPzP6/CSU-Internship-Platform?fullscreen=1&t=TqCMUcA0WOrBVuOZ-1)
+
+> *Note: Both prototypes include the "Happy Path" for Student Job Search (Sherwin-Williams, GCP, Progressive) and will be used for our 5-user A/B testing.*
 
 ---
 # CSU IS Career Hub
@@ -37,9 +39,10 @@ Current CSU Information Systems students lack a centralized, major-specific plat
 ---
 
 ## 2. Technical Approach
-* **Frontend:** React / Next.js
-* **Backend:** Node.js / Express
-* **Database:** MongoDB or PostgreSQL
+* **Frontend:** HTML5 / CSS (Bootstrap 5) / JavaScript (HTMX)
+* **Backend:** Python (Django 5.0)
+* **Database:** PostgreSQL 16
+* **Hosting:** Render (PaaS)
 
 ---
 

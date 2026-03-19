@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSU IS Career Hub</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f8f9fa; }
+        .header { color: #006A4D; } /* CSU Forest Green */
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 600px;}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="header">CSU Internship Portal</h1>
+        <p>Welcome to the Check-in #3 Vertical Slice Demo.</p>
+
+        <button 
+            hx-get="http://127.0.0.1:8000/api/jobs" 
+            hx-target="#job-results" 
+            style="background-color: #006A4D; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+            Find IS Internships
+        </button>
+
+        <div id="job-results" style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px;">
+            <em style="color: gray;">Click the button to fetch live data from the SQLite database...</em>
+        </div>
+    </div>
+</body>
+</html>

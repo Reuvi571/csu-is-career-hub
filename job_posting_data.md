@@ -114,3 +114,26 @@ Salary: $20/hour
 
 ## Summary
 This data supports future recommendation features by linking each job posting to the skills and certifications most relevant for CSU IS students.
+
+
+## Recommendation Logic
+
+The platform will recommend certifications based on job requirements.
+
+Example:
+
+- Job: Data Analyst Intern  
+  Skills: SQL, Excel, Power BI  
+  Recommended Certifications:
+  - SQL Certificate  
+  - Power BI Certificate  
+
+- Job: Front-End Developer Intern  
+  Skills: HTML, CSS, JavaScript, React  
+  Recommended Certifications:
+  - HTML/CSS Certificate  
+  - JavaScript Certificate  
+  - React Certificate  
+
+This connects:
+Jobs → Skills → Certifications

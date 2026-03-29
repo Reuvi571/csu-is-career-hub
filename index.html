@@ -2,29 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSU IS Career Hub</title>
+    <meta name="description" content="Cleveland State University Information Systems Career Hub for finding local tech internships.">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f8f9fa; }
-        .header { color: #006A4D; } /* CSU Forest Green */
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 600px;}
-    </style>
 </head>
-<body>
-    <div class="card">
-        <h1 class="header">CSU Internship Portal</h1>
-        <p>Welcome to the Check-in #3 Vertical Slice Demo.</p>
-
-        <button 
-            hx-get="http://127.0.0.1:8000/api/jobs" 
-            hx-target="#job-results" 
-            style="background-color: #006A4D; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
-            Find IS Internships
-        </button>
-
-        <div id="job-results" style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px;">
-            <em style="color: gray;">Click the button to fetch live data from the SQLite database...</em>
+<body class="bg-slate-50 p-8">
+    <main class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-green-800 mb-2">CSU IS Career Hub</h1>
+        <p class="text-slate-600 mb-8">Check-in #4: Live Database & MDN Integration</p>
+        
+        <div class="space-y-4">
+            {% for job in jobs %}
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-xl font-bold text-slate-800">{{ job.title }}</h2>
+                    <span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">{{ job.experience_level }}</span>
+                </div>
+                <p class="text-slate-600 font-medium">{{ job.company }} &bull; {{ job.location }}</p>
+                <p class="text-slate-500 text-sm mt-2 mb-4">{{ job.description }}</p>
+                
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Required:</span>
+                    <button hx-get="/api/mdn/{{ job.skills_required }}/" 
+                            hx-target="#mdn-{{ job.id }}" 
+                            aria-label="View official MDN definition for {{ job.skills_required }}"
+                            class="px-3 py-1 bg-slate-100 hover:bg-slate-200 transition-colors rounded-full text-xs font-bold border border-slate-300">
+                        {{ job.skills_required }}
+                    </button>
+                </div>
+                <div id="mdn-{{ job.id }}"></div>
+            </div>
+            {% empty %}
+            <div class="text-center p-12 border-2 border-dashed border-slate-300 rounded-xl">
+                <p class="text-slate-500">Database is currently empty. Run the seed script.</p>
+            </div>
+            {% endfor %}
         </div>
-    </div>
+    </main>
 </body>
 </html>

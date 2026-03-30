@@ -1,48 +1,30 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from django.http import HttpResponse
 from .models import JobPosting
-import json
 
-def list_jobs(request):
-    jobs = list(JobPosting.objects.values())
-    return JsonResponse(jobs, safe=False)
+def dashboard(request):
+    jobs = JobPosting.objects.all().order_by('-date_posted')
+    return render(request, 'index.html', {'jobs': jobs})
 
-@csrf_exempt
-def create_job(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-
-        job = JobPosting.objects.create(
-            title=data["title"],
-            company=data["company"],
-            location=data.get("location", "Cleveland, OH")
-        )
-
-        return JsonResponse({"id": str(job.id)}, status=201)
+def mdn_popup(request, skill_name):
+    definitions = {
+        'JavaScript': 'A lightweight, interpreted, object-oriented language with first-class functions.',
+        'Python': 'A high-level, general-purpose programming language known for readability.',
+        'SQL': 'Standard language for storing, manipulating and retrieving data in databases.',
+        'React': 'A declarative, efficient, and flexible JavaScript library for building user interfaces.',
+        'HTML': 'The standard markup language for documents designed to be displayed in a web browser.'
+    }
     
-@csrf_exempt
-def update_job(request, job_id):
-    if request.method == "PUT":
-        try:
-            job = JobPosting.objects.get(id=job_id)
-            data = json.loads(request.body)
-
-            job.title = data.get("title", job.title)
-            job.company = data.get("company", job.company)
-            job.location = data.get("location", job.location)
-            job.save()
-
-            return JsonResponse({"message": "updated"}, status=200)
-        except JobPosting.DoesNotExist:
-            return JsonResponse({"error": "not found"}, status=404)
-
-
-@csrf_exempt
-def delete_job(request, job_id):
-    if request.method == "DELETE":
-        try:
-            job = JobPosting.objects.get(id=job_id)
-            job.delete()
-            return JsonResponse({"message": "deleted"}, status=200)
-        except JobPosting.DoesNotExist:
-            return JsonResponse({"error": "not found"}, status=404)
+    desc = "Learn more about this technology on the official MDN Web Docs."
+    for key, val in definitions.items():
+        if key.lower() in skill_name.lower():
+            desc = val
+            skill_name = key
+            break
+            
+    return HttpResponse(f"""
+        <div class="p-3 mt-3 bg-blue-50 border-l-4 border-blue-500 rounded text-sm transition-all">
+            <p class="font-bold text-blue-800">MDN Dictionary: {skill_name}</p>
+            <p class="text-blue-700">{desc}</p>
+        </div>
+    """)

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Search, Filter, Building2, ArrowUpDown } from "lucide-react"; // Added ArrowUpDown icon
+import { Search, Filter, Building2, ArrowUpDown } from "lucide-react";
 
 export function CompaniesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,10 +19,11 @@ export function CompaniesPage() {
           id: c.id,
           name: c.name,
           location: c.location,
-          avgRating: c.avg_rating,
-          reviewCount: c.review_count,
-          csuHires: c.job_count,
-          industry: "Technology", // Updated fallback so it looks better than "Unknown" for the demo
+          // Added safe fallbacks for the missing API data
+          avgRating: c.avg_rating || 0,
+          reviewCount: c.review_count || 0,
+          csuHires: c.job_count || 0,
+          industry: "Technology", 
           description: "",
           internshipRoles: [],
           logo: "🏢"
@@ -70,17 +71,18 @@ export function CompaniesPage() {
           <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl">
             <Building2 className="h-7 w-7 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900">Companies</h1>
+          {/* Removed text-gray-900 so it respects your dark mode */}
+          <h1 className="text-4xl font-bold">Companies</h1>
         </div>
         <p className="text-muted-foreground text-lg">
           🏢 Explore {companies.length}+ companies actively hiring CSU students
         </p>
       </div>
 
-      <Card className="mb-8 border-2 border-blue-100 shadow-sm">
+      <Card className="mb-8 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-lg">
-            <Filter className="h-5 w-5 text-blue-500" />
+            <Filter className="h-5 w-5 text-primary" />
             <span>Filter & Search</span>
           </CardTitle>
         </CardHeader>
@@ -97,7 +99,6 @@ export function CompaniesPage() {
                 />
               </div>
 
-              {/* Industry Filter Dropdown */}
               <Select value={industryFilter} onValueChange={setIndustryFilter}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue placeholder="Industry" />
@@ -112,7 +113,6 @@ export function CompaniesPage() {
                 </SelectContent>
               </Select>
 
-              {/* THE MISSING SORT BY DROPDOWN */}
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -133,33 +133,34 @@ export function CompaniesPage() {
 
       {filteredCompanies.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-xl text-gray-500">No companies found matching your criteria.</p>
+          <p className="text-xl text-muted-foreground">No companies found matching your criteria.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCompanies.map((company, i) => (
-            <Card key={company.id || i} className="hover:shadow-lg hover:border-blue-300 transition-all bg-white">
+            <Card key={company.id || i} className="hover:shadow-md transition-all">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl text-blue-600">
+                <CardTitle className="text-xl text-primary">
                   {company.name || "Unknown"}
                 </CardTitle>
-                <CardDescription className="text-gray-600 font-medium">
-                  {company.location || "No location"}
+                <CardDescription className="font-medium">
+                  {company.location || "Location not specified"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-4 border-t mt-2">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500 mb-1">Company Rating</p>
-                    <p className="font-semibold text-lg text-gray-900">{company.avgRating ? `⭐ ${company.avgRating}` : "New"}</p>
+                    <p className="text-muted-foreground mb-1">Company Rating</p>
+                    <p className="font-semibold text-lg">{company.avgRating > 0 ? `⭐ ${company.avgRating}` : "New"}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500 mb-1">Total Reviews</p>
-                    <p className="font-semibold text-lg text-gray-900">{company.reviewCount} Reviews</p>
+                    <p className="text-muted-foreground mb-1">Total Reviews</p>
+                    <p className="font-semibold text-lg">{company.reviewCount} Reviews</p>
                   </div>
-                  <div className="col-span-2 bg-blue-50 p-3 rounded-md mt-2">
-                    <p className="text-blue-800 font-medium">
-                      🚀 {company.csuHires} Open Roles Available
+                  <div className="col-span-2 bg-secondary/50 p-3 rounded-md mt-2">
+                    <p className="text-secondary-foreground font-medium flex items-center gap-2">
+                      <span>🚀</span>
+                      {company.csuHires > 0 ? `${company.csuHires} Open Roles Available` : "Accepting General Applications"}
                     </p>
                   </div>
                 </div>

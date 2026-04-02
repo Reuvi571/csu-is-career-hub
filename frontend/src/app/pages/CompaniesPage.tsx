@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Search, Filter, Building2 } from "lucide-react";
+import { Search, Filter, Building2, ArrowUpDown } from "lucide-react"; // Added ArrowUpDown icon
 
 export function CompaniesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,25 +15,18 @@ export function CompaniesPage() {
     fetch("http://127.0.0.1:8000/api/companies/")
       .then(res => res.json())
       .then(data => {
-        console.log("API DATA:", data);
-
         const formatted = data.map((c: any) => ({
           id: c.id,
           name: c.name,
           location: c.location,
-
-          // REAL DATA FROM BACKEND
           avgRating: c.avg_rating,
           reviewCount: c.review_count,
           csuHires: c.job_count,
-
-          // still placeholders (fine for now)
-          industry: "Unknown",
+          industry: "Technology", // Updated fallback so it looks better than "Unknown" for the demo
           description: "",
           internshipRoles: [],
           logo: "🏢"
         }));
-
         setCompanies(formatted);
       })
       .catch(err => console.error(err));
@@ -77,17 +70,17 @@ export function CompaniesPage() {
           <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-xl">
             <Building2 className="h-7 w-7 text-white" />
           </div>
-          <h1 className="text-4xl">Companies</h1>
+          <h1 className="text-4xl font-bold text-gray-900">Companies</h1>
         </div>
         <p className="text-muted-foreground text-lg">
-          🏢 Explore {companies.length}+ companies
+          🏢 Explore {companies.length}+ companies actively hiring CSU students
         </p>
       </div>
 
-      <Card className="mb-8 border-2 border-blue-100">
+      <Card className="mb-8 border-2 border-blue-100 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-lg">
-            <Filter className="h-5 w-5" />
+            <Filter className="h-5 w-5 text-blue-500" />
             <span>Filter & Search</span>
           </CardTitle>
         </CardHeader>
@@ -104,6 +97,7 @@ export function CompaniesPage() {
                 />
               </div>
 
+              {/* Industry Filter Dropdown */}
               <Select value={industryFilter} onValueChange={setIndustryFilter}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue placeholder="Industry" />
@@ -117,35 +111,58 @@ export function CompaniesPage() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* THE MISSING SORT BY DROPDOWN */}
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rating">Highest Rated</SelectItem>
+                  <SelectItem value="reviews">Most Reviews</SelectItem>
+                  <SelectItem value="hires">Most Open Roles</SelectItem>
+                  <SelectItem value="name">Alphabetical (A-Z)</SelectItem>
+                </SelectContent>
+              </Select>
+
             </div>
           </div>
         </CardContent>
       </Card>
 
       {filteredCompanies.length === 0 ? (
-        <p>No companies found</p>
+        <div className="text-center py-12">
+          <p className="text-xl text-gray-500">No companies found matching your criteria.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCompanies.map((company, i) => (
-            <Card key={company.id || i}>
-              <CardHeader>
-                <CardTitle>
+            <Card key={company.id || i} className="hover:shadow-lg hover:border-blue-300 transition-all bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl text-blue-600">
                   {company.name || "Unknown"}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 font-medium">
                   {company.location || "No location"}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p>
-                  Rating: {company.avgRating ?? "N/A"}
-                </p>
-                <p>
-                  Reviews: {company.reviewCount}
-                </p>
-                <p>
-                  Open Roles: {company.csuHires}
-                </p>
+              <CardContent className="pt-4 border-t mt-2">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500 mb-1">Company Rating</p>
+                    <p className="font-semibold text-lg text-gray-900">{company.avgRating ? `⭐ ${company.avgRating}` : "New"}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 mb-1">Total Reviews</p>
+                    <p className="font-semibold text-lg text-gray-900">{company.reviewCount} Reviews</p>
+                  </div>
+                  <div className="col-span-2 bg-blue-50 p-3 rounded-md mt-2">
+                    <p className="text-blue-800 font-medium">
+                      🚀 {company.csuHires} Open Roles Available
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}

@@ -3,11 +3,11 @@ from django.http import HttpResponse, JsonResponse
 from .models import JobPosting, CompanyReview, Company
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 
 
 # =========================
-# EXISTING (UPDATED)
+# DASHBOARD
 # =========================
 def dashboard(request):
     cutoff = timezone.now().date() - timedelta(days=16)
@@ -16,7 +16,7 @@ def dashboard(request):
 
 
 # =========================
-# EXISTING (TEMP FEATURE)
+# MDN POPUP
 # =========================
 def mdn_popup(request, skill_name):
     definitions = {
@@ -49,7 +49,6 @@ def get_jobs(request):
     cutoff = timezone.now().date() - timedelta(days=16)
     jobs = JobPosting.objects.filter(date_posted__gte=cutoff).order_by('-date_posted')
 
-    # FILTERS
     role = request.GET.get('role')
     cert = request.GET.get('certification')
     location = request.GET.get('location')
@@ -65,7 +64,10 @@ def get_jobs(request):
         jobs = jobs.filter(location__icontains=location)
 
     if search:
-        jobs = jobs.filter(Q(title__icontains=search) | Q(company__name__icontains=search))
+        jobs = jobs.filter(
+            Q(title__icontains=search) |
+            Q(company__name__icontains=search)
+        )
 
     jobs = jobs.distinct()
 
@@ -74,15 +76,15 @@ def get_jobs(request):
         data.append({
             "id": str(job.id),
             "title": job.title,
-            "company": job.company.name,  # FIXED
+            "company": {
+                "id": job.company.id,
+                "name": job.company.name,
+            },
             "location": job.location,
-
             "skills": job.skills_required,
             "certs_text": job.certs_recommended,
-
             "certifications": [c.name for c in job.certifications.all()],
             "roles": [r.name for r in job.roles.all()],
-
             "date_posted": job.date_posted.strftime("%Y-%m-%d"),
         })
 
@@ -113,10 +115,14 @@ def reviews_api(request):
 
 
 # =========================
-# COMPANIES API
+# COMPANIES API (OPTIMIZED)
 # =========================
 def companies_api(request):
-    companies = Company.objects.all()
+    companies = Company.objects.all().annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews'),
+        job_count=Count('jobposting')
+    )
 
     search = request.GET.get('search')
     if search:
@@ -126,7 +132,11 @@ def companies_api(request):
     for c in companies:
         data.append({
             "id": c.id,
-            "name": c.name
+            "name": c.name,
+            "location": c.location,
+            "avg_rating": round(c.avg_rating or 0, 1),
+            "review_count": c.review_count,
+            "job_count": c.job_count,
         })
 
     return JsonResponse(data, safe=False)

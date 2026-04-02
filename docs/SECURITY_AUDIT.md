@@ -1,7 +1,14 @@
 # Security Threat Model & Risk Register (Check-in #4)
 
 ## Threat Model Summary
-Our threat model now covers the live integration between the React frontend (Vite) and the Django REST backend. The primary assets remain user credentials and the integrity of the job posting database. With the API now functional, the primary attack surface has shifted to the trust boundary between the frontend `fetch` calls and the backend `views.py` logic.
+Our threat model covers the live integration between the React frontend (Vite) and the Django REST backend. The primary assets are user credentials and the integrity of the job posting database. With the API now functional, the primary attack surface has shifted to the trust boundary between the frontend `fetch` calls and the backend `views.py` logic.
+
+## Risk Definitions
+* **SQL Injection (SQLi):** An attacker inserts malicious SQL code into input fields to manipulate the backend database, potentially bypassing authentication or stealing data.
+* **Cross-Site Scripting (XSS):** Injecting malicious scripts into web pages viewed by other users. This can lead to session theft or defacement of the site.
+* **Cross-Site Request Forgery (CSRF):** Tricking a logged-in user's browser into sending an unauthorized request to the web application (e.g., deleting a job post) without their knowledge.
+* **Broken Access Control:** A flaw where users can act outside of their intended permissions, such as a "Student" account accessing "Admin" level deletion tools.
+* **Session Hijacking:** An attacker steals a user's session ID (often via unencrypted traffic) to impersonate them and gain unauthorized access to the system.
 
 ## Risk Register (Verified Status)
 

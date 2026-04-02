@@ -8,6 +8,7 @@ import { SalariesPage } from "./pages/SalariesPage";
 import { AlumniPage } from "./pages/AlumniPage";
 import { AdminPage } from "./pages/AdminPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { JobsPage } from "./pages/JobsPage";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "alumni", Component: AlumniPage },
       { path: "admin", Component: AdminPage },
       { path: "*", Component: NotFoundPage },
+      { path: "jobs", Component: JobsPage },
     ],
   },
 ]);

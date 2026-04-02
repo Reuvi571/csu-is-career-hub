@@ -30,6 +30,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
 
   const navItems = [
     { path: "/", label: "Home", icon: GraduationCap },
+    { path: "/jobs", label: "Jobs", icon: Building2 },   // ← ADD THIS
     { path: "/companies", label: "Companies", icon: Building2 },
     { path: "/reviews", label: "Reviews", icon: Star },
     { path: "/salaries", label: "Salaries", icon: DollarSign },

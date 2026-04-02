@@ -9,31 +9,34 @@
 
 ---
 
-## ⚔️ Project Overview
-The **CSU IS Career Hub** is a centralized, major-specific platform designed for Cleveland State University Information Systems students. It allows "Vikings" to track local internship opportunities, share salary data, and read peer reviews of Cleveland-based employers in a secure, accessible environment.
+## 📜 Compliance & Professional Standards
+To ensure a high-quality product, our team integrated the following standards from Modules 6 & 7:
 
-**Current Status:** Sprint 4 (Week 8) - Frontend/Backend Integration Complete.
+### 🛡️ Security (OWASP Framework)
+* **Testing Mindset:** Our risk register and manual test cases are mapped to the **OWASP Web Security Testing Guide (WSTG)**, specifically focusing on authentication and input validation.
+* **Verification:** Security requirements were audited against the **OWASP Application Security Verification Standard (ASVS)** to ensure robust protection against SQLi and XSS.
+
+### ♿ Accessibility (WebAIM & Lighthouse)
+* **Implementation:** All UI remediations (ARIA labels, semantic headings) were implemented following the **WebAIM WCAG 2 Checklist** to support screen readers and keyboard navigation.
+* **Auditing:** Utilized **Chrome Lighthouse** for automated accessibility audits, maintaining a consistent score of **93+** across primary MVP pages.
+
+---
 
 ## 🛠️ Updated Tech Stack
-We have modernized our architecture to a decoupled, professional-grade stack:
 * **Frontend:** React 18, TypeScript, Tailwind CSS, Shadcn UI, Vite.
-* **Backend:** Python 3.12, Django 6.0.3, Django REST Framework.
+* **Backend:** Python 3.12, Django 5.0+, Django REST Framework.
 * **Database:** SQLite (Development) / PostgreSQL (Production).
 * **Security:** Django-CORS-Headers, Security+ compliant risk mitigation.
-* **Auditing:** Lighthouse (93+ Accessibility), Manual Threat Modeling.
-
-
 
 ## 🌟 Sprint 4 Key Deliverables
-* **Live Integration:** The React frontend now successfully fetches and displays live data from the Django REST API.
-* **Job Discovery:** Successfully seeded the database with **20+ Cleveland-based IS internships** (Progressive, Hyland, KeyBank, etc.).
-* **Interactive UI:** Implemented a functional Job Details modal and a dynamic Company Sorting system.
-* **Security Audit:** Verified SQL Injection and XSS protections via the Django ORM and React auto-escaping.
-* **Accessibility:** Achieved a **93+ Lighthouse score** through semantic HTML and ARIA label implementation.
+* **Live Integration:** React frontend fetches live data from the Django REST API.
+* **Job Discovery:** Database seeded with **20+ Cleveland-based IS internships** (Progressive, Hyland, KeyBank, etc.).
+* **Interactive UI:** Implemented functional Job Details modal and dynamic Company Sorting.
+* **Security Verification:** Verified SQLi and XSS protections via Django ORM and React auto-escaping.
 
 ## 👥 Team Lipins (Spring 2026)
-* **Team Lead:** Ruben Lipins
-* **Developers:** Allen Nozic, William R. Jackson, Madhav Ashokbhai Bhalani, Anthony Doly
+* **Team Lead:** Ruben Lipins 
+* **Developers:**  Allen Nozic,  William R. Jackson, Madhav Ashokbhai Bhalani, Anthony Doly
 
 ## 🚀 Quick Start
 ### Backend

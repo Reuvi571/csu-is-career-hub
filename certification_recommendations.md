@@ -1,145 +1,69 @@
 # CSU IS Career Hub – Certification Recommendations
 
-Author: Madhav Bhalani
-
-## Purpose
-This document connects useful certifications to technical skills and job roles for CSU Information Systems students.
+**Author:** Madhav Bhalani & Development Team
+**Purpose:** This document maps required technical skills found in local job postings to industry-recognized certifications. This mapping will serve as the data dictionary for the Recommendation Engine in the CSU IS Career Hub.
 
 ---
 
-## Certification Mapping
+## 🌐 Web Development & Design
+| Required Skill / Keyword | Recommended Certification | Related Roles |
+| :--- | :--- | :--- |
+| HTML, CSS, Responsive Design | W3C Front End Web Developer | Front-End Intern, Web Designer |
+| JavaScript, DOM Manipulation | Meta Front-End Developer | Web App Developer, Software Intern |
+| React, State Management | IBM Front-End Development | React Developer Intern, UI Engineer |
+| Wireframing, Prototyping, UX | Google UX Design Certificate | UX Intern, Product Design Intern |
 
-### 1. HTML/CSS Certificate
-Skills:
-- HTML
-- CSS
-- Responsive Design
+## ☁️ Cloud Computing & Architecture
+| Required Skill / Keyword | Recommended Certification | Related Roles |
+| :--- | :--- | :--- |
+| AWS, Cloud Basics, S3, EC2 | AWS Certified Cloud Practitioner | Cloud Support Intern, IT Analyst |
+| Azure, Microsoft Cloud | Microsoft Certified: Azure Fundamentals | IT Support Analyst, Systems Analyst |
+| Oracle, OCI, Infrastructure | Oracle Cloud Infrastructure Foundations | Cloud Operations Intern |
 
-Related Jobs:
-- Front-End Developer Intern
-- Web Designer
-- UI Developer
+## 🛡️ Cybersecurity & Networking
+| Required Skill / Keyword | Recommended Certification | Related Roles |
+| :--- | :--- | :--- |
+| Cybersecurity, Threat Analysis | CompTIA Security+ | InfoSec Intern, Security Analyst |
+| Risk Management, Access Control | Google Cybersecurity Certificate | Junior Cybersecurity Analyst |
+| TCP/IP, Routing, Switches | CompTIA Network+ / Cisco CCNA | Network Engineer Intern |
 
-Why It Matters:
-This helps students build and style websites and understand how web pages are structured.
+## 📊 Data & Database Management
+| Required Skill / Keyword | Recommended Certification | Related Roles |
+| :--- | :--- | :--- |
+| SQL, Relational Databases | Oracle Database SQL Certified | Database Intern, Data Analyst |
+| Data Visualization, Tableau | Google Data Analytics Certificate | Business Analyst Intern |
 
----
+## 💻 Software Engineering & Version Control
+| Required Skill / Keyword | Recommended Certification | Related Roles |
+| :--- | :--- | :--- |
+| Python, Scripting | PCEP (Entry-Level Python Programmer) | Software Developer Intern |
+| C#, .NET Framework | Microsoft Certified: C# Certification | Backend Developer Intern |
+| Git, GitHub, Version Control | GitHub Foundations | Developer Intern, DevOps Intern |
 
-### 2. JavaScript Certificate
-Skills:
-- JavaScript
-- DOM Manipulation
-- Interactive Web Development
-
-Related Jobs:
-- Front-End Developer Intern
-- Web Application Developer
-- Software Developer Intern
-
-Why It Matters:
-JavaScript is one of the most common skills listed in web-based job postings.
-
----
-
-### 3. React Certificate
-Skills:
-- React
-- Components
-- State Management
-- Front-End Frameworks
-
-Related Jobs:
-- React Developer Intern
-- Front-End Engineer
-- UI Developer
-
-Why It Matters:
-React is highly relevant for modern web development roles.
+## 🛠️ IT Support & Project Management
+| Required Skill / Keyword | Recommended Certification | Related Roles |
+| :--- | :--- | :--- |
+| Help Desk, Hardware, Windows | CompTIA A+ | Help Desk Support, IT Tech |
+| Agile, Sprints, Scrum | Certified ScrumMaster (CSM) | Junior Scrum Master, PM Intern |
+| Project Management, SDLC | CAPM (Associate in Project Management) | IT Project Coordinator Intern |
 
 ---
 
-### 4. AWS Cloud Practitioner
-Skills:
-- Cloud Basics
-- AWS Services
-- Deployment Concepts
+### ⚙️ Developer Note: Backend Data Structure
+Use this dictionary structure for the recommendation logic in `views.py` when we build the engine next sprint.
 
-Related Jobs:
-- Cloud Support Intern
-- IT Analyst
-- Cloud Operations Intern
-
-Why It Matters:
-Cloud knowledge is useful for many entry-level IT and systems roles.
-
----
-
-### 5. Microsoft Azure Fundamentals
-Skills:
-- Cloud Computing
-- Azure Basics
-- Infrastructure Concepts
-
-Related Jobs:
-- IT Support Analyst
-- Cloud Intern
-- Systems Analyst
-
-Why It Matters:
-Azure is commonly used in enterprise environments.
-
----
-
-### 6. UI/UX Design Certificate
-Skills:
-- Wireframing
-- User Research
-- Prototyping
-- Usability
-
-Related Jobs:
-- UX Intern
-- Product Design Intern
-- UI Designer
-
-Why It Matters:
-This supports user-centered design and improves website usability.
-
----
-
-### 7. SQL Certificate
-Skills:
-- SQL
-- Data Queries
-- Data Analysis
-- Relational Databases
-
-Related Jobs:
-- Data Analyst Intern
-- Business Analyst Intern
-- Database Intern
-
-Why It Matters:
-SQL is one of the most important skills for IS students and appears often in analytics and data roles.
-
----
-
-### 8. Git/GitHub Certificate
-Skills:
-- Version Control
-- Collaboration
-- Pull Requests
-- Branching
-
-Related Jobs:
-- Software Intern
-- IT Intern
-- Developer Intern
-
-Why It Matters:
-GitHub workflow is essential in team-based technical projects.
-
----
-
-## Summary
-The goal is to connect certifications to real skills and then connect those skills to job opportunities shown in the CSU IS Career Hub platform.
+```python
+CERT_MAPPING = {
+    "HTML": ["W3C Front End Web Developer"],
+    "CSS": ["W3C Front End Web Developer"],
+    "JavaScript": ["Meta Front-End Developer"],
+    "React": ["IBM Front-End Development"],
+    "AWS": ["AWS Certified Cloud Practitioner"],
+    "Azure": ["Microsoft Certified: Azure Fundamentals"],
+    "UX": ["Google UX Design Certificate"],
+    "SQL": ["Oracle Database SQL Certified", "Google Data Analytics Certificate"],
+    "Git": ["GitHub Foundations"],
+    "Cybersecurity": ["CompTIA Security+", "Google Cybersecurity Certificate"],
+    "Python": ["PCEP (Entry-Level Python Programmer)"],
+    "Troubleshooting": ["CompTIA A+"]
+}

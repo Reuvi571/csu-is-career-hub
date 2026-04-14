@@ -1,15 +1,21 @@
-# 🚀 CSU IS Career Hub - Check-in #4 (Week 8)
+# 🚀 CSU IS Career Hub - Check-in #5 (Final)
 
-## ✅ Sprint 4 Deliverables Status: FEATURE-COMPLETE (MVP)
-* **MVP Happy Path:** [MET] Frontend-Backend integration live.
-* **Database Seeding:** [MET] 20+ internships loaded via `seed.py`.
-* **Accessibility:** [MET] Lighthouse score 93+ with verified remediations.
-* **Security:** [MET] Threat Model and Risk Register updated for Sprint 4.
-* **Project Management:** [MET] Backlog updated for Sprint 5 transition.
+## ✅ Final Deliverables Status: PRODUCTION-READY
+* **CI/CD Pipeline:** [MET] GitHub Actions implemented for automated Django backend testing and React Vite frontend builds.
+* **Staging Deployment:** [MET] Auto-deploy connected via cloud hosting triggered automatically on `main` branch merges.
+* **Performance Improvements:** [MET] Implemented React Lazy Loading (`Suspense` Code Splitting) on all primary routes to reduce initial JS payload and boost Lighthouse scores.
+* **Analytics / Event Logging:** [MET] Custom `JOB_VIEW` event tracker integrated into `JobsPage.tsx` to log student interactions.
 
 ---
 
-## 📜 Compliance & Professional Standards
+## 📊 Week 10: Performance & Analytics Report
+* **CI/CD Architecture:** Dual-environment GitHub Actions workflow (`ci.yml`) runs `manage.py check` (Python 3.12) and compiles Vite (Node 20) on every push.
+* **Performance Optimization (Lighthouse):** Refactored `routes.tsx` to use `React.lazy()`. *Tradeoff:* Users experience a brief 500ms loading state on initial tab navigation, but the initial Time-to-Interactive payload is massively reduced.
+* **Event Analytics:** Integrated a custom user-event logger on the Jobs page to track interactions for future database ingestion without relying on heavy third-party trackers.
+
+---
+
+## 📜 Compliance & Professional Standards (Sprint 4)
 To ensure a high-quality product, our team integrated the following standards from Modules 6 & 7:
 
 ### 🛡️ Security (OWASP Framework)
@@ -22,21 +28,15 @@ To ensure a high-quality product, our team integrated the following standards fr
 
 ---
 
-## 🛠️ Updated Tech Stack
+## 🛠️ Tech Stack
 * **Frontend:** React 18, TypeScript, Tailwind CSS, Shadcn UI, Vite.
 * **Backend:** Python 3.12, Django 5.0+, Django REST Framework.
 * **Database:** SQLite (Development) / PostgreSQL (Production).
 * **Security:** Django-CORS-Headers, Security+ compliant risk mitigation.
 
-## 🌟 Sprint 4 Key Deliverables
-* **Live Integration:** React frontend fetches live data from the Django REST API.
-* **Job Discovery:** Database seeded with **20+ Cleveland-based IS internships** (Progressive, Hyland, KeyBank, etc.).
-* **Interactive UI:** Implemented functional Job Details modal and dynamic Company Sorting.
-* **Security Verification:** Verified SQLi and XSS protections via Django ORM and React auto-escaping.
-
 ## 👥 Team Lipins (Spring 2026)
 * **Team Lead:** Ruben Lipins 
-* **Developers:**  Allen Nozic,  William R. Jackson, Madhav Ashokbhai Bhalani, Anthony Doly
+* **Developers:** Allen Nozic, William R. Jackson, Madhav Ashokbhai Bhalani, Anthony Doly
 
 ## 🚀 Quick Start
 ### Backend
@@ -53,5 +53,5 @@ To ensure a high-quality product, our team integrated the following standards fr
 Utilized Google Gemini for:
 * Architectural troubleshooting and state management logic.
 * Generating CSV/JSON seed data for 20+ internship listings.
-* Drafting the Sprint 4 Security Threat Model and Risk Register.
+* Drafting the Security Threat Model, Risk Register, and CI/CD pipelines.
 * *All AI-generated logic is manually reviewed and verified by the student team.*

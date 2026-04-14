@@ -1,0 +1,39 @@
+name: CSU IS Career Hub CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    # 1. Checkout the Code
+    - uses: actions/checkout@v3
+
+    # 2. Setup Python & Test Backend
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+    - name: Install Backend Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Django System Check
+      run: |
+        cd backend
+        python manage.py check
+
+    # 3. Setup Node & Test Frontend
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: "18"
+    - name: Install Frontend Dependencies & Build
+      run: |
+        cd frontend
+        npm ci
+        npm run build

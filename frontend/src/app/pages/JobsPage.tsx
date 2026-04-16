@@ -65,6 +65,17 @@ export function JobsPage() {
     setFilters({ location: "", experience: "", role: "" });
   };
 
+  // Analytics Logger
+  const logJobInteraction = (job: any) => {
+    setSelectedJob(job);
+    console.log(`📊 [ANALYTICS LOGGED] EVENT: JOB_VIEW`, {
+      timestamp: new Date().toISOString(),
+      jobId: job.id,
+      jobTitle: job.title,
+      company: job.company?.name || job.company
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -200,7 +211,7 @@ export function JobsPage() {
               {filteredJobs.map((job) => (
                 <div
                   key={job.id}
-                  onClick={() => setSelectedJob(job)}
+                  onClick={() => logJobInteraction(job)}
                   className={`p-4 hover:bg-gray-50 cursor-pointer transition-all border-l-4 ${
                     selectedJob?.id === job.id ? "border-l-blue-600 bg-blue-50" : "border-l-transparent"
                   }`}

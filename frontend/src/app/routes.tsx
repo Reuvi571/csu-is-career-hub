@@ -12,6 +12,8 @@ const AlumniPage = lazy(() => import("./pages/AlumniPage").then(m => ({ default:
 const AdminPage = lazy(() => import("./pages/AdminPage").then(m => ({ default: m.AdminPage })));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
 const JobsPage = lazy(() => import("./pages/JobsPage").then(m => ({ default: m.JobsPage })));
+const CertificationsPage = lazy(() => import("./pages/CertificationsPage").then(m => ({ default: m.CertificationsPage })));
+const CertificationDetailPage = lazy(() => import("./pages/CertificationDetailPage").then(m => ({ default: m.CertificationDetailPage })));
 
 // 2. The Suspense Wrapper
 const SuspenseWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -38,6 +40,8 @@ export const router = createBrowserRouter([
       { path: "alumni", element: <SuspenseWrapper><AlumniPage /></SuspenseWrapper> },
       { path: "admin", element: <SuspenseWrapper><AdminPage /></SuspenseWrapper> },
       { path: "jobs", element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
+      { path: "certifications", element: <SuspenseWrapper><CertificationsPage /></SuspenseWrapper> },
+      { path: "certifications/:id", element: <SuspenseWrapper><CertificationDetailPage /></SuspenseWrapper> },
       { path: "*", element: <SuspenseWrapper><NotFoundPage /></SuspenseWrapper> },
     ],
   },

@@ -54,16 +54,63 @@ def run():
     # CERTIFICATIONS
     # -------------------
     certs = {
-        "SQL": Certification.objects.create(name="SQL Certificate"),
-        "PowerBI": Certification.objects.create(name="Power BI Certificate"),
-        "HTMLCSS": Certification.objects.create(name="HTML/CSS Certificate"),
-        "JS": Certification.objects.create(name="JavaScript Certificate"),
-        "React": Certification.objects.create(name="React Certificate"),
-        "AWS": Certification.objects.create(name="AWS Cloud Practitioner"),
-        "Azure": Certification.objects.create(name="Azure Fundamentals"),
-        "UX": Certification.objects.create(name="UI/UX Design Certificate"),
-        "Git": Certification.objects.create(name="Git/GitHub Certificate"),
+        "SQL": Certification.objects.create(
+            name="SQL Certificate",
+            description="Master SQL fundamentals including queries, joins, aggregations, and database design. Essential for data professionals.",
+            organization="Various providers (Microsoft, Oracle, etc.)"
+        ),
+        "PowerBI": Certification.objects.create(
+            name="Power BI Certificate",
+            description="Learn data visualization and business analytics using Microsoft Power BI. Create interactive dashboards and reports.",
+            organization="Microsoft"
+        ),
+        "HTMLCSS": Certification.objects.create(
+            name="HTML/CSS Certificate",
+            description="Build strong foundation in web markup and styling. Essential for front-end development and web design.",
+            organization="Various providers"
+        ),
+        "JS": Certification.objects.create(
+            name="JavaScript Certificate",
+            description="Master JavaScript programming language for client-side and server-side development. Core skill for web developers.",
+            organization="Various providers"
+        ),
+        "React": Certification.objects.create(
+            name="React Certificate",
+            description="Learn React library for building dynamic user interfaces. Includes components, hooks, state management.",
+            organization="Meta/Facebook"
+        ),
+        "AWS": Certification.objects.create(
+            name="AWS Cloud Practitioner",
+            description="Foundational cloud computing certification covering AWS services, architecture, and best practices.",
+            organization="Amazon Web Services"
+        ),
+        "Azure": Certification.objects.create(
+            name="Azure Fundamentals",
+            description="Introduction to Microsoft Azure cloud services and cloud computing concepts.",
+            organization="Microsoft"
+        ),
+        "UX": Certification.objects.create(
+            name="UI/UX Design Certificate",
+            description="Learn user interface and user experience design principles, tools like Figma, and design thinking methodologies.",
+            organization="Various providers"
+        ),
+        "Git": Certification.objects.create(
+            name="Git/GitHub Certificate",
+            description="Master version control using Git and GitHub. Essential for collaborative software development.",
+            organization="GitHub/Linux Foundation"
+        ),
     }
+
+    # Assign roles to certifications
+    certs["SQL"].roles.add(roles["Data"], roles["Database"], roles["Business"])
+    certs["PowerBI"].roles.add(roles["Data"], roles["Business"])
+    certs["HTMLCSS"].roles.add(roles["Frontend"], roles["UX"])
+    certs["JS"].roles.add(roles["Frontend"], roles["Software"])
+    certs["React"].roles.add(roles["Frontend"], roles["Software"])
+    certs["AWS"].roles.add(roles["Cloud"], roles["Software"], roles["Systems"])
+    certs["Azure"].roles.add(roles["Cloud"], roles["IT"], roles["Systems"])
+    certs["UX"].roles.add(roles["UX"], roles["Frontend"])
+    certs["Git"].roles.add(roles["Software"], roles["Frontend"], roles["Systems"])
 
     def create_job(title, company, location, skills, cert_list, role):
         job = JobPosting.objects.create(

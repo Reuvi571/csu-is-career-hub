@@ -19,4 +19,7 @@ urlpatterns = [
 
     path('api/reviews/', views.reviews_api, name='reviews_api'),
     path('api/companies/', views.companies_api, name='companies_api'),
+
+    path('api/certifications/', views.certifications_api, name='certifications_api'),
+    path('api/certifications/<int:cert_id>/', views.certification_detail_api, name='certification_detail_api'),
 ]

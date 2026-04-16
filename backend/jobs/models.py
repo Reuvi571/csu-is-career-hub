@@ -18,6 +18,9 @@ class Company(models.Model):
 
 class Certification(models.Model):
     name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    organization = models.CharField(max_length=255, blank=True, null=True)
+    roles = models.ManyToManyField('Role', blank=True, related_name='certifications')
 
     def __str__(self):
         return self.name

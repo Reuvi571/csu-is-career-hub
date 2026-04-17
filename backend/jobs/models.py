@@ -4,9 +4,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 
-# =========================
 # CORE ENTITIES
-# =========================
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
@@ -33,9 +31,7 @@ class Role(models.Model):
         return self.name
 
 
-# =========================
 # JOB POSTINGS
-# =========================
 
 class JobPosting(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -53,10 +49,6 @@ class JobPosting(models.Model):
         help_text="e.g., $20/hr - $30/hr"
     )
 
-    # TEMP FIELDS (keep for now so frontend doesn't break)
-    skills_required = models.CharField(max_length=255)
-    certs_recommended = models.CharField(max_length=255, blank=True, null=True)
-
     # RELATIONAL FIELDS
     certifications = models.ManyToManyField(Certification, blank=True)
     roles = models.ManyToManyField(Role, blank=True)
@@ -71,9 +63,7 @@ class JobPosting(models.Model):
         return f"{self.title} at {self.company.name}"
 
 
-# =========================
 # COMPANY REVIEWS
-# =========================
 
 class CompanyReview(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='reviews')
@@ -94,9 +84,7 @@ class CompanyReview(models.Model):
         return f"{self.company.name} Review"
 
 
-# =========================
 # ALUMNI
-# =========================
 
 class Alumni(models.Model):
     name = models.CharField(max_length=255)

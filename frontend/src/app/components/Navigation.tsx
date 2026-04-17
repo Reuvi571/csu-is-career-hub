@@ -47,7 +47,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
   };
 
   return (
-    <nav className="bg-teal-700 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 bg-[#00795f]">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section - Left */}
@@ -55,9 +55,9 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
             <div className="flex flex-col justify-start leading-tight">
               <div className="text-sm font-bold text-white tracking-tight">
                 <span>CSU</span>
-                <span className="text-lime-400 font-black ml-1">IS</span>
+                <span className="ml-1 font-black text-[#8dc63f]">IS</span>
               </div>
-              <div className="text-xs text-teal-100 font-semibold">Careers</div>
+              <div className="text-xs font-semibold text-white/85">Careers</div>
             </div>
           </Link>
 
@@ -71,8 +71,8 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                   to={item.path}
                   className={`flex items-center space-x-1 text-sm font-semibold transition-colors ${
                     isActive(item.path)
-                      ? "text-lime-300"
-                      : "text-white hover:text-lime-300"
+                      ? "text-[#b5d334]"
+                      : "text-white hover:text-[#b5d334]"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -94,8 +94,8 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                     to={item.path}
                     className={`flex items-center space-x-1 text-sm font-semibold transition-colors ${
                       isActive(item.path)
-                        ? "text-lime-300"
-                        : "text-white hover:text-lime-300"
+                        ? "text-[#b5d334]"
+                        : "text-white hover:text-[#b5d334]"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -110,7 +110,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
               <div className="flex items-center space-x-4">
                 {user.role === "admin" && (
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-white hover:text-lime-300 hover:bg-teal-600">
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-[#00684f] hover:text-[#b5d334]">
                       <Shield className="h-4 w-4 mr-1" />
                       Admin
                     </Button>
@@ -118,9 +118,9 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                 )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-none hover:bg-teal-600">
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-none hover:bg-[#00684f]">
                       <Avatar>
-                        <AvatarFallback className="bg-lime-400 text-teal-700 font-semibold">
+                        <AvatarFallback className="bg-[#8dc63f] font-semibold text-[#00795f]">
                           {getInitials(user.name)}
                         </AvatarFallback>
                       </Avatar>
@@ -148,7 +148,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
             ) : (
               <Button 
                 onClick={onLoginClick} 
-                className="bg-lime-400 hover:bg-lime-500 text-teal-700 font-semibold px-4 py-2 h-10"
+                className="h-10 bg-[#8dc63f] px-4 py-2 font-semibold text-[#00795f] hover:bg-[#79b52c]"
               >
                 Sign In
               </Button>

@@ -6,18 +6,14 @@ from django.utils import timezone
 from django.db.models import Q, Avg, Count
 
 
-# =========================
 # DASHBOARD
-# =========================
 def dashboard(request):
     cutoff = timezone.now().date() - timedelta(days=16)
     jobs = JobPosting.objects.filter(date_posted__gte=cutoff).order_by('-date_posted')
     return render(request, 'index.html', {'jobs': jobs})
 
 
-# =========================
 # MDN POPUP
-# =========================
 def mdn_popup(request, skill_name):
     definitions = {
         'JavaScript': 'A lightweight, interpreted, object-oriented language with first-class functions.',
@@ -42,9 +38,7 @@ def mdn_popup(request, skill_name):
     """)
 
 
-# =========================
 # JOBS API
-# =========================
 def get_jobs(request):
     cutoff = timezone.now().date() - timedelta(days=16)
     jobs = JobPosting.objects.filter(date_posted__gte=cutoff).order_by('-date_posted')
@@ -81,8 +75,9 @@ def get_jobs(request):
                 "name": job.company.name,
             },
             "location": job.location,
-            "skills": job.skills_required,
-            "certs_text": job.certs_recommended,
+            "description": job.description or "",
+            "experience_level": job.experience_level,
+            "salary_range": job.salary_range or "",
             "certifications": [c.name for c in job.certifications.all()],
             "roles": [r.name for r in job.roles.all()],
             "date_posted": job.date_posted.strftime("%Y-%m-%d"),
@@ -91,9 +86,7 @@ def get_jobs(request):
     return JsonResponse(data, safe=False)
 
 
-# =========================
 # REVIEWS API
-# =========================
 def reviews_api(request):
     reviews = CompanyReview.objects.select_related('company').all()
 
@@ -114,9 +107,7 @@ def reviews_api(request):
     return JsonResponse(data, safe=False)
 
 
-# =========================
 # COMPANIES API (OPTIMIZED)
-# =========================
 def companies_api(request):
     cutoff = timezone.now().date() - timedelta(days=16)
     companies = Company.objects.filter(
@@ -159,9 +150,7 @@ def companies_api(request):
     return JsonResponse(data, safe=False)
 
 
-# =========================
 # CERTIFICATIONS API
-# =========================
 def certifications_api(request):
     """
     Get all certifications with optional filtering by role.

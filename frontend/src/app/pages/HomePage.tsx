@@ -2,11 +2,16 @@ import { Link, useOutletContext } from "react-router";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { mockCompanies, mockReviews, mockSalaryData, mockUsers, User } from "../data/mockData";
-import { Building2, Star, DollarSign, Users, MapPin, Calendar, ArrowRight, Briefcase } from "lucide-react";
+import { mockCompanies, mockReviews, mockSalaryData, User } from "../data/mockData";
+import { Building2, Star, DollarSign, Users, MapPin, Calendar, ArrowRight, Briefcase, Award } from "lucide-react";
 
 export function HomePage() {
   const { user } = useOutletContext<{ user: User | null }>();
+  const approvedReviewCount = mockReviews.filter((review) => review.isApproved).length;
+  const averageHourlyRate =
+    Math.round(
+      mockSalaryData.reduce((sum, salary) => sum + salary.hourlyRate, 0) / mockSalaryData.length
+    ) || 0;
   
   // Create job postings from companies and salary data
   const getRecentJobs = () => {
@@ -26,126 +31,168 @@ export function HomePage() {
   const recentJobs = getRecentJobs();
 
   return (
-    <main className="min-h-screen bg-white">
-      {/* Hero Section - Clean & Simple */}
-      <div className="relative bg-teal-700 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 opacity-95"></div>
-        
-        {/* Subtle grid background */}
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent)',
-          backgroundSize: '50px 50px'
-        }}></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            {/* Official Badge */}
-            <div className="inline-flex items-center space-x-2 bg-white/10 px-4 py-2 mb-8 border border-white/20">
-              <div className="h-2 w-2 bg-lime-400 block"></div>
-              <span className="text-sm font-semibold">Official CSU Career Portal</span>
-            </div>
-
-            {/* Main Headline */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Your Internship
-              <br />
-              <span className="text-lime-400">Starts Here</span>
-            </h1>
-
-            {/* Subheading */}
-            <p className="text-lg md:text-xl text-teal-50 mb-10 leading-relaxed">
-              Find internships at Cleveland's leading companies and advance your IS career
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="bg-lime-400 hover:bg-lime-500 text-teal-900 font-bold text-base px-8 py-3">
-                <Link to="/jobs">
-                  <Briefcase className="h-5 w-5 mr-2" aria-hidden="true" />
-                  Browse All Jobs
-                </Link>
-              </Button>
-              <Button asChild size="lg" className="bg-white/20 hover:bg-white/30 text-white font-semibold text-base px-8 py-3 border border-white/40">
-                <Link to="/companies">
-                  <Building2 className="h-5 w-5 mr-2" aria-hidden="true" />
-                  Companies
-                </Link>
-              </Button>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="flex flex-wrap justify-center items-center gap-8 mt-12 text-sm text-teal-100">
-              <div className="flex items-center space-x-2">
-                <Building2 className="h-5 w-5 text-lime-400" aria-hidden="true" />
-                <span>22+ Companies</span>
+    <main className="min-h-screen bg-white text-[#5f6368]">
+      <section className="bg-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-0 px-4 py-12 sm:px-6 lg:grid-cols-[290px_minmax(0,1fr)] lg:px-8 lg:py-16">
+          <aside className="border-b border-[#d5d8db] pb-8 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-10">
+            <div className="max-w-[240px]">
+              <p className="mb-6 text-4xl font-bold leading-tight text-[#00795f]">
+                CSU IS Career Hub
+              </p>
+              <div className="space-y-5 text-[#00795f]">
+                <div className="border-b border-[#d5d8db] pb-5">
+                  <p className="mb-2 text-2xl font-bold">Internships and jobs</p>
+                  <p className="text-base font-normal text-[#5f6368]">
+                    Browse active roles in software, analytics, systems, and support.
+                  </p>
+                </div>
+                <div className="border-b border-[#d5d8db] pb-5">
+                  <p className="mb-2 text-2xl font-bold">Employer information</p>
+                  <p className="text-base font-normal text-[#5f6368]">
+                    Review company locations, hiring patterns, and student feedback in one place.
+                  </p>
+                </div>
+                <div className="border-b border-[#d5d8db] pb-5">
+                  <p className="mb-2 text-2xl font-bold">Certification pathways</p>
+                  <p className="text-base font-normal text-[#5f6368]">
+                    See which certifications show up across roles, then jump into current jobs asking for them.
+                  </p>
+                </div>
+                <div>
+                  <p className="mb-2 text-2xl font-bold">Compensation data</p>
+                  <p className="text-base font-normal text-[#5f6368]">
+                    Compare reported hourly rates before applying or evaluating offers.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Briefcase className="h-5 w-5 text-lime-400" aria-hidden="true" />
-                <span>100+ Positions</span>
+            </div>
+          </aside>
+
+          <div className="pt-8 lg:pt-0 lg:pl-14">
+            <div className="max-w-4xl">
+              <div className="mb-5 inline-flex items-center gap-2 border border-[#d5d8db] bg-[#f5f7f5] px-4 py-2 text-sm font-semibold text-[#00795f]">
+                <div className="h-2 w-2 bg-[#8dc63f]" />
+                <span>Career services for CSU Information Systems students</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-lime-400" aria-hidden="true" />
-                <span>500+ Reviews</span>
+
+              <h1 className="mb-6 text-5xl font-bold leading-none text-[#00795f] md:text-6xl">
+                Internship and
+                <br />
+                early-career opportunities
+              </h1>
+
+              <div className="space-y-6 text-xl leading-relaxed text-[#5f6368]">
+                <p>
+                  The Career Hub helps CSU students focus on the employers, roles, and application details that matter most during an internship or first-job search.
+                </p>
+                <p>
+                  Use the job board to review openings, compare reported pay, read student-submitted reviews, and identify certifications employers are actively looking for by role.
+                </p>
+                <p>
+                  The certifications directory connects that research back to open roles, so you can explore a cert and immediately see the kinds of opportunities it supports.
+                </p>
+              </div>
+
+              <div className="mt-10 grid grid-cols-1 border border-[#d5d8db] md:grid-cols-3">
+                <div className="border-b border-[#d5d8db] bg-white p-6 md:border-b-0 md:border-r">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#00795f]">Hiring companies</p>
+                  <p className="mt-2 text-4xl font-bold text-[#00795f]">{mockCompanies.length}</p>
+                  <p className="mt-2 text-base text-[#5f6368]">Regional employers with IS-relevant roles and company details.</p>
+                </div>
+                <div className="border-b border-[#d5d8db] bg-white p-6 md:border-b-0 md:border-r">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#00795f]">Verified reviews</p>
+                  <p className="mt-2 text-4xl font-bold text-[#00795f]">{approvedReviewCount}</p>
+                  <p className="mt-2 text-base text-[#5f6368]">Student feedback on interview process, workload, and culture.</p>
+                </div>
+                <div className="bg-white p-6">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#00795f]">Average hourly pay</p>
+                  <p className="mt-2 text-4xl font-bold text-[#00795f]">${averageHourlyRate}</p>
+                  <p className="mt-2 text-base text-[#5f6368]">Reported internship compensation across the current salary dataset.</p>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:flex-wrap">
+                <Button asChild size="lg" className="rounded-none bg-[#00795f] px-8 font-bold text-white hover:bg-[#00684f]">
+                  <Link to="/jobs">
+                    <Briefcase className="mr-2 h-5 w-5" aria-hidden="true" />
+                    View Open Roles
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-none border-[#00795f] px-8 font-semibold text-[#00795f] hover:bg-[#f2f7f3]">
+                  <Link to="/companies">
+                    <Building2 className="mr-2 h-5 w-5" aria-hidden="true" />
+                    Employer Directory
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-none border-[#00795f] px-8 font-semibold text-[#00795f] hover:bg-[#f2f7f3]">
+                  <Link to="/certifications">
+                    <Award className="mr-2 h-5 w-5" aria-hidden="true" />
+                    Explore Certifications
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Recent Jobs Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center justify-between mb-12 flex-col md:flex-row gap-6">
+      <section className="border-t border-[#d5d8db] bg-[#f5f7f5]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="inline-block bg-teal-100 text-teal-700 px-3 py-1 text-sm font-semibold mb-3">
+            <div className="mb-3 inline-block bg-[#dff0dc] px-3 py-1 text-sm font-semibold text-[#00795f]">
               Recently Posted
             </div>
-            <h2 className="text-4xl font-bold text-gray-900">Open Positions</h2>
-            <p className="text-lg text-gray-600 mt-2">
-              Browse the latest internship opportunities at Cleveland companies
+            <h2 className="text-4xl font-bold text-[#00795f]">Current opportunities</h2>
+            <p className="mt-2 max-w-3xl text-lg text-[#5f6368]">
+              A focused list of positions aligned to the kinds of roles CSU Information Systems students typically pursue.
             </p>
           </div>
           <Link to="/jobs" className="hidden md:block flex-shrink-0">
-            <Button variant="outline" size="lg" className="font-semibold border-teal-300 text-teal-700 hover:bg-teal-50">
+            <Button variant="outline" size="lg" className="rounded-none border-[#00795f] font-semibold text-[#00795f] hover:bg-[#eef6f0]">
               View All Jobs <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
             </Button>
           </Link>
         </div>
 
         {/* Jobs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {recentJobs.map((job) => (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          {recentJobs.map((job, idx) => (
             <Link key={job.id} to="/jobs" className="group">
-              <Card className="h-full border border-gray-200 hover:shadow-lg transition-shadow bg-white hover:border-teal-300">
+              <Card className="h-full rounded-none border border-[#d5d8db] bg-white shadow-none transition-colors hover:border-[#00795f]">
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-teal-100 flex items-center justify-center">
-                      <Building2 className="h-6 w-6 text-teal-700" aria-hidden="true" />
+                  <div className="mb-4 flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center bg-[#eef6f0]">
+                      <Building2 className="h-6 w-6 text-[#00795f]" aria-hidden="true" />
                     </div>
-                    <Badge className="bg-lime-100 text-lime-700 border-0">New</Badge>
+                    <Badge className="rounded-none border-0 bg-[#dff0dc] text-[#00795f]">
+                      {idx % 3 === 0 ? "Internship" : idx % 3 === 1 ? "Co-op" : "Entry Level"}
+                    </Badge>
                   </div>
                   
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-teal-700 transition-colors">
+                  <h3 className="mb-2 text-xl font-bold text-[#00795f] transition-colors group-hover:text-[#00684f]">
                     {job.title}
                   </h3>
-                  <p className="text-teal-700 font-semibold mb-4">{job.company}</p>
+                  <p className="mb-4 font-semibold text-[#3d4348]">{job.company}</p>
 
-                  <div className="space-y-3 mb-6 text-sm text-gray-600">
+                  <div className="mb-6 space-y-3 text-sm text-[#5f6368]">
                     <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      <MapPin className="h-4 w-4 text-[#00795f]" aria-hidden="true" />
                       <span>{job.location}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <DollarSign className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      <DollarSign className="h-4 w-4 text-[#00795f]" aria-hidden="true" />
                       <span>{job.salary}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      <Calendar className="h-4 w-4 text-[#00795f]" aria-hidden="true" />
                       <span>{job.postedDate}</span>
                     </div>
                   </div>
 
-                  <Button className="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold">
-                    View Details
+                  <Button className="w-full rounded-none bg-[#00795f] font-semibold text-white hover:bg-[#00684f]">
+                    Open Role
                   </Button>
                 </CardContent>
               </Card>
@@ -154,78 +201,83 @@ export function HomePage() {
         </div>
 
         <div className="text-center md:hidden">
-          <Button asChild size="lg" className="bg-teal-700 hover:bg-teal-800 text-white font-semibold w-full">
+          <Button asChild size="lg" className="w-full rounded-none bg-[#00795f] font-semibold text-white hover:bg-[#00684f]">
             <Link to="/jobs">
               View All Jobs <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
             </Link>
           </Button>
         </div>
-      </div>
+        </div>
+      </section>
 
       {/* Why Choose CSU Careers Section */}
-      <div className="bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Use CSU Careers Hub</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Designed for Cleveland State University IS students to connect with local opportunities
+      <section className="bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mb-10 max-w-3xl">
+            <h2 className="mb-4 text-4xl font-bold text-[#00795f]">What students usually need before applying</h2>
+            <p className="text-lg text-[#5f6368]">
+              The hub is most useful when you need concrete details on employers, roles, certifications, and compensation without digging through multiple sites.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-0 border border-[#d5d8db] md:grid-cols-3">
             {/* Card 1 */}
-            <div className="bg-white p-8 border border-gray-200">
-              <div className="w-12 h-12 bg-teal-100 flex items-center justify-center mb-6">
-                <MapPin className="h-6 w-6 text-teal-700" aria-hidden="true" />
+            <div className="border-b border-[#d5d8db] bg-white p-8 md:border-b-0 md:border-r">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#eef6f0]">
+                <MapPin className="h-6 w-6 text-[#00795f]" aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Local Opportunities</h3>
-              <p className="text-gray-600">
-                Find internships with companies actually hiring CSU IS students in the Cleveland area
+              <h3 className="mb-3 text-2xl font-bold text-[#00795f]">Employer snapshots</h3>
+              <p className="text-[#5f6368]">
+                See which Cleveland-area employers hire CSU students, where they are located, and what kinds of roles they tend to open.
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white p-8 border border-gray-200">
-              <div className="w-12 h-12 bg-lime-100 flex items-center justify-center mb-6">
-                <Star className="h-6 w-6 text-lime-700" aria-hidden="true" />
+            <div className="border-b border-[#d5d8db] bg-white p-8 md:border-b-0 md:border-r">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#eef6f0]">
+                <Star className="h-6 w-6 text-[#00795f]" aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Real Reviews</h3>
-              <p className="text-gray-600">
-                Read honest feedback from your peers about internships and company culture
+              <h3 className="mb-3 text-2xl font-bold text-[#00795f]">Student reviews</h3>
+              <p className="text-[#5f6368]">
+                Read how past interns described the interview process, day-to-day work, and whether they would recommend the experience.
               </p>
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white p-8 border border-gray-200">
-              <div className="w-12 h-12 bg-teal-100 flex items-center justify-center mb-6">
-                <DollarSign className="h-6 w-6 text-teal-700" aria-hidden="true" />
+            <div className="bg-white p-8">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#eef6f0]">
+                <DollarSign className="h-6 w-6 text-[#00795f]" aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Salary Data</h3>
-              <p className="text-gray-600">
-                Know your worth with transparent salary information from CSU alumni
+              <h3 className="mb-3 text-2xl font-bold text-[#00795f]">Pay benchmarks</h3>
+              <p className="text-[#5f6368]">
+                Compare reported hourly rates so you have a realistic sense of what similar internship and co-op offers look like.
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* CTA Footer Section */}
-      <div className="bg-teal-700 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready to Start?</h2>
-          <p className="text-xl text-teal-50 mb-8 max-w-2xl mx-auto">
+      <section className="border-t border-[#d5d8db] bg-[#00795f] py-14 text-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+          <h2 className="mb-4 text-4xl font-bold">Start with the roles that fit your path</h2>
+          <p className="text-xl text-white/90">
             {user 
-              ? "Check out the latest opportunities and begin your career journey today" 
-              : "Join CSU students in finding their perfect internship"}
+              ? "Use the hub to narrow in on the employers, reviews, and compensation data that matter most to your search."
+              : "Browse opportunities the way CSU students actually search: by employer, role type, and real peer feedback."}
           </p>
+            </div>
           <Button asChild size="lg" className="bg-lime-400 hover:bg-lime-500 text-teal-900 font-bold">
             <Link to="/jobs">
               <Briefcase className="h-5 w-5 mr-2" aria-hidden="true" />
-              Explore Opportunities
+              Browse Opportunities
             </Link>
           </Button>
+          </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

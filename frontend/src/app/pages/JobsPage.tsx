@@ -305,33 +305,17 @@ export function JobsPage() {
                 </p>
               </div>
 
-              {/* Skills Required */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Required Skills</h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedJob.skills_required?.split(",").map((skill: string, idx: number) => (
-                    <Badge key={idx} variant="outline" className="text-sm">
-                      {skill.trim()}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
               {/* Certifications */}
-              {(selectedJob.certifications?.length > 0 || selectedJob.certs_recommended) && (
+              {selectedJob.certifications?.length > 0 && (
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Certifications</h3>
-                  {selectedJob.certifications?.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedJob.certifications.map((cert: string, idx: number) => (
-                        <Badge key={idx} className="bg-green-100 text-green-800 text-sm">
-                          {cert}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-600">{selectedJob.certs_recommended || "None"}</p>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {selectedJob.certifications.map((cert: string, idx: number) => (
+                      <Badge key={idx} className="bg-green-100 text-green-800 text-sm">
+                        {cert}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               )}
 

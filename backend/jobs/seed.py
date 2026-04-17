@@ -1,19 +1,47 @@
 import os
 import sys
 import django
+import re
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 django.setup()
 
-from jobs.models import Company, Role, Certification, JobPosting, CompanyReview
+from django.contrib.auth import get_user_model
+from jobs.models import Company, Role, Certification, JobPosting, CompanyReview, SalaryReport, CareerUserProfile
 from django.utils import timezone
+
+User = get_user_model()
+
+
+def parse_hourly_range(salary_range):
+    values = re.findall(r"\d+(?:\.\d+)?", salary_range or "")
+    if len(values) < 2:
+        return None, None
+
+    return values[0], values[1]
+
+
+def infer_position_type(title, experience_level):
+    combined = f"{title} {experience_level}".lower()
+
+    if "co-op" in combined or "co op" in combined or "coop" in combined:
+        return "co_op"
+    if "part-time" in combined or "part time" in combined:
+        return "part_time"
+    if "entry" in combined:
+        return "entry_level"
+
+    return "internship"
 
 
 def run():
     # reset
+    CareerUserProfile.objects.all().delete()
+    User.objects.exclude(is_superuser=True).delete()
     JobPosting.objects.all().delete()
     CompanyReview.objects.all().delete()
+    SalaryReport.objects.all().delete()
     Company.objects.all().delete()
     Role.objects.all().delete()
     Certification.objects.all().delete()
@@ -22,21 +50,21 @@ def run():
     # COMPANIES
     # -------------------
     companies = {
-        "Hyland": Company.objects.create(name="Hyland", location="Westlake, OH"),
-        "Progressive": Company.objects.create(name="Progressive Insurance", location="Cleveland, OH"),
-        "KeyBank": Company.objects.create(name="KeyBank", location="Cleveland, OH"),
-        "Cleveland Clinic": Company.objects.create(name="Cleveland Clinic", location="Cleveland, OH"),
-        "MRI Software": Company.objects.create(name="MRI Software", location="Solon, OH"),
-        "IBM": Company.objects.create(name="IBM", location="Hybrid / Ohio"),
-        "Sherwin-Williams": Company.objects.create(name="Sherwin-Williams", location="Cleveland, OH"),
-        "Eaton": Company.objects.create(name="Eaton", location="Beachwood, OH"),
-        "Medical Mutual": Company.objects.create(name="Medical Mutual", location="Cleveland, OH"),
-        "OnShift": Company.objects.create(name="OnShift", location="Cleveland, OH"),
-        "CrossCountry": Company.objects.create(name="CrossCountry Mortgage", location="Cleveland, OH"),
-        "MetroHealth": Company.objects.create(name="The MetroHealth System", location="Cleveland, OH"),
-        "PNC": Company.objects.create(name="PNC Bank", location="Cleveland, OH"),
-        "Flexjet": Company.objects.create(name="Flexjet", location="Richmond Heights, OH"),
-        "Rocket": Company.objects.create(name="Rocket Software", location="Hybrid / Ohio"),
+        "Hyland": Company.objects.create(name="Hyland", location="Westlake, OH", industry="Enterprise Software", size="3,000+ employees", website="hyland.com", description="Hyland develops enterprise content management and workflow products used by healthcare, public sector, and commercial teams."),
+        "Progressive": Company.objects.create(name="Progressive Insurance", location="Cleveland, OH", industry="Insurance Technology", size="10,000+ employees", website="progressive.com", description="Progressive hires across analytics, product, and software teams supporting digital insurance operations and internal platforms."),
+        "KeyBank": Company.objects.create(name="KeyBank", location="Cleveland, OH", industry="Financial Services", size="17,000+ employees", website="key.com", description="KeyBank supports banking, data, and enterprise systems roles tied to digital channels, reporting, and risk platforms."),
+        "Cleveland Clinic": Company.objects.create(name="Cleveland Clinic", location="Cleveland, OH", industry="Healthcare", size="70,000+ employees", website="clevelandclinic.org", description="Cleveland Clinic maintains large-scale clinical and business systems with opportunities in support, applications, analytics, and operations."),
+        "MRI Software": Company.objects.create(name="MRI Software", location="Solon, OH", industry="Real Estate Technology", size="4,000+ employees", website="mrisoftware.com", description="MRI Software builds property and real estate technology products with design, front-end, and product support opportunities."),
+        "IBM": Company.objects.create(name="IBM", location="Hybrid / Ohio", industry="Cloud and Consulting", size="100,000+ employees", website="ibm.com", description="IBM offers cloud, platform, and software roles that expose students to enterprise-scale systems and automation workflows."),
+        "Sherwin-Williams": Company.objects.create(name="Sherwin-Williams", location="Cleveland, OH", industry="Manufacturing", size="60,000+ employees", website="sherwin-williams.com", description="Sherwin-Williams hires for business systems, software, and reporting roles tied to supply chain, retail, and enterprise operations."),
+        "Eaton": Company.objects.create(name="Eaton", location="Beachwood, OH", industry="Industrial Technology", size="90,000+ employees", website="eaton.com", description="Eaton supports data, reporting, and business technology roles connected to manufacturing and operations teams."),
+        "Medical Mutual": Company.objects.create(name="Medical Mutual", location="Cleveland, OH", industry="Health Insurance", size="2,000+ employees", website="medmutual.com", description="Medical Mutual hires students for systems, security, and business operations roles supporting health insurance platforms."),
+        "OnShift": Company.objects.create(name="OnShift", location="Cleveland, OH", industry="Workforce Software", size="1,000+ employees", website="onshift.com", description="OnShift offers product support and implementation-facing opportunities working with workforce management software."),
+        "CrossCountry": Company.objects.create(name="CrossCountry Mortgage", location="Cleveland, OH", industry="Mortgage Technology", size="7,000+ employees", website="crosscountrymortgage.com", description="CrossCountry Mortgage supports analysts and operations roles tied to mortgage platforms, reporting, and customer workflows."),
+        "MetroHealth": Company.objects.create(name="The MetroHealth System", location="Cleveland, OH", industry="Healthcare", size="8,000+ employees", website="metrohealth.org", description="MetroHealth maintains operational and clinical systems that create opportunities in reporting, analytics, and business systems support."),
+        "PNC": Company.objects.create(name="PNC Bank", location="Cleveland, OH", industry="Financial Services", size="50,000+ employees", website="pnc.com", description="PNC hires across payments technology, infrastructure, and analyst roles supporting banking systems and customer-facing platforms."),
+        "Flexjet": Company.objects.create(name="Flexjet", location="Richmond Heights, OH", industry="Aviation", size="3,000+ employees", website="flexjet.com", description="Flexjet supports operational systems roles tied to scheduling, dispatch, reporting, and internal aviation technology workflows."),
+        "Rocket": Company.objects.create(name="Rocket Software", location="Hybrid / Ohio", industry="Software", size="2,500+ employees", website="rocketsoftware.com", description="Rocket offers software, security, and platform roles with a strong focus on product engineering and cloud-adjacent systems."),
     }
 
     # -------------------
@@ -153,6 +181,59 @@ def run():
     certs["Python"].roles.add(roles["Data"], roles["Software"], roles["Database"])
     certs["Agile"].roles.add(roles["Business"], roles["Software"], roles["UX"], roles["Systems"])
 
+    users = {}
+    user_seed_data = [
+        {
+            "key": "admin",
+            "email": "admin@csu.edu",
+            "first_name": "Admin",
+            "last_name": "User",
+            "role": "admin",
+            "graduation_year": None,
+            "major": "Information Systems",
+            "is_staff": True,
+        },
+        {
+            "key": "student",
+            "email": "sarah.j@csu.edu",
+            "first_name": "Sarah",
+            "last_name": "Johnson",
+            "role": "student",
+            "graduation_year": 2026,
+            "major": "Information Systems",
+            "is_staff": False,
+        },
+        {
+            "key": "alumni",
+            "email": "michael.c@csu.edu",
+            "first_name": "Michael",
+            "last_name": "Chen",
+            "role": "alumni",
+            "graduation_year": 2024,
+            "major": "Information Systems",
+            "is_staff": False,
+        },
+    ]
+
+    for user_data in user_seed_data:
+        user = User.objects.create_user(
+            username=user_data["email"],
+            email=user_data["email"],
+            first_name=user_data["first_name"],
+            last_name=user_data["last_name"],
+            password="csu-demo-login",
+        )
+        user.is_staff = user_data["is_staff"]
+        user.save(update_fields=["is_staff"])
+
+        CareerUserProfile.objects.create(
+            user=user,
+            role=user_data["role"],
+            graduation_year=user_data["graduation_year"],
+            major=user_data["major"],
+        )
+        users[user_data["key"]] = user
+
     def create_job(
         title,
         company,
@@ -160,17 +241,20 @@ def run():
         description,
         experience_level,
         salary_range,
-        skills,
         cert_list,
         role_list,
     ):
+        min_hourly_rate, max_hourly_rate = parse_hourly_range(salary_range)
+
         job = JobPosting.objects.create(
             title=title,
             company=company,
             location=location,
             description=description,
             experience_level=experience_level,
-            salary_range=salary_range,
+            position_type=infer_position_type(title, experience_level),
+            min_hourly_rate=min_hourly_rate,
+            max_hourly_rate=max_hourly_rate,
         )
         for role in role_list:
             job.roles.add(role)
@@ -577,7 +661,6 @@ def run():
             job_data["description"],
             job_data["experience_level"],
             job_data["salary_range"],
-            job_data["skills"],
             job_data["certs"],
             job_data["roles"],
         )
@@ -588,36 +671,86 @@ def run():
 
     CompanyReview.objects.create(
         company=companies["Hyland"],
+        user=users["student"],
         role="Front-End Intern",
         rating=4.6,
         pros="Modern stack",
         cons="Fast paced",
         interview_process="Frontend challenge",
         recommendation="Good experience",
-        skills_used="React, JS"
+        skills_used="React, JS",
+        status="approved",
     )
 
     CompanyReview.objects.create(
         company=companies["Progressive"],
+        user=users["alumni"],
         role="Data Analyst Intern",
         rating=4.3,
         pros="Great learning environment",
         cons="Slow processes",
         interview_process="SQL + behavioral",
         recommendation="Good for beginners",
-        skills_used="SQL, Excel"
+        skills_used="SQL, Excel",
+        status="approved",
     )
 
     CompanyReview.objects.create(
         company=companies["IBM"],
+        user=users["student"],
         role="Cloud Intern",
         rating=4.7,
         pros="Strong cloud exposure",
         cons="Complex systems",
         interview_process="Cloud basics",
         recommendation="Great for cloud path",
-        skills_used="AWS"
+        skills_used="AWS",
+        status="approved",
     )
+
+    CompanyReview.objects.create(
+        company=companies["MRI Software"],
+        user=users["student"],
+        role="UI/UX Design Intern",
+        rating=4.2,
+        pros="Supportive product design team and strong feedback cycles.",
+        cons="Some projects moved slowly because of multiple stakeholders.",
+        interview_process="Portfolio review followed by a design walkthrough and behavioral interview.",
+        recommendation="A strong fit for students who want product design exposure.",
+        skills_used="Figma, Prototyping, Research",
+        status="pending",
+    )
+
+    salary_seed_data = [
+        {"year": 2023, "position_type": "internship", "avg_hourly_rate": 20.5, "min_hourly_rate": 18, "max_hourly_rate": 23, "posting_count": 26},
+        {"year": 2024, "position_type": "internship", "avg_hourly_rate": 21.8, "min_hourly_rate": 19, "max_hourly_rate": 24, "posting_count": 28},
+        {"year": 2025, "position_type": "internship", "avg_hourly_rate": 23.6, "min_hourly_rate": 20, "max_hourly_rate": 27, "posting_count": 31},
+        {"year": 2026, "position_type": "internship", "avg_hourly_rate": 24.8, "min_hourly_rate": 21, "max_hourly_rate": 30, "posting_count": 35},
+        {"year": 2023, "position_type": "co_op", "avg_hourly_rate": 21.2, "min_hourly_rate": 19, "max_hourly_rate": 24, "posting_count": 8},
+        {"year": 2024, "position_type": "co_op", "avg_hourly_rate": 22.7, "min_hourly_rate": 20, "max_hourly_rate": 25, "posting_count": 9},
+        {"year": 2025, "position_type": "co_op", "avg_hourly_rate": 24.4, "min_hourly_rate": 21, "max_hourly_rate": 28, "posting_count": 10},
+        {"year": 2026, "position_type": "co_op", "avg_hourly_rate": 25.9, "min_hourly_rate": 22, "max_hourly_rate": 29, "posting_count": 12},
+        {"year": 2023, "position_type": "part_time", "avg_hourly_rate": 17.6, "min_hourly_rate": 15, "max_hourly_rate": 20, "posting_count": 5},
+        {"year": 2024, "position_type": "part_time", "avg_hourly_rate": 18.3, "min_hourly_rate": 16, "max_hourly_rate": 20, "posting_count": 6},
+        {"year": 2025, "position_type": "part_time", "avg_hourly_rate": 19.4, "min_hourly_rate": 17, "max_hourly_rate": 21, "posting_count": 6},
+        {"year": 2026, "position_type": "part_time", "avg_hourly_rate": 20.2, "min_hourly_rate": 18, "max_hourly_rate": 22, "posting_count": 7},
+        {"year": 2023, "position_type": "entry_level", "avg_hourly_rate": 25.7, "min_hourly_rate": 22, "max_hourly_rate": 29, "posting_count": 10},
+        {"year": 2024, "position_type": "entry_level", "avg_hourly_rate": 27.3, "min_hourly_rate": 24, "max_hourly_rate": 31, "posting_count": 11},
+        {"year": 2025, "position_type": "entry_level", "avg_hourly_rate": 29.1, "min_hourly_rate": 25, "max_hourly_rate": 33, "posting_count": 12},
+        {"year": 2026, "position_type": "entry_level", "avg_hourly_rate": 30.6, "min_hourly_rate": 27, "max_hourly_rate": 35, "posting_count": 13},
+    ]
+
+    for report in salary_seed_data:
+        SalaryReport.objects.create(
+            company=report.get("company"),
+            role=report.get("role", ""),
+            position_type=report["position_type"],
+            year=report["year"],
+            avg_hourly_rate=report["avg_hourly_rate"],
+            min_hourly_rate=report["min_hourly_rate"],
+            max_hourly_rate=report["max_hourly_rate"],
+            posting_count=report["posting_count"],
+        )
 
     print("✅ FULL seed loaded )")
 

@@ -102,8 +102,8 @@ export function CompaniesPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <section className="relative overflow-hidden bg-teal-700 text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 opacity-95" />
+      <section className="relative overflow-hidden bg-[#2d694f] text-white">
+        <div className="absolute inset-0 bg-[#2d694f] opacity-95" />
         <div
           className="absolute inset-0 opacity-5"
           style={{
@@ -116,27 +116,27 @@ export function CompaniesPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-18 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <div className="mb-6 inline-flex items-center space-x-2 border border-white/20 bg-white/10 px-4 py-2">
-              <div className="block h-2 w-2 bg-lime-400" />
+              <div className="block h-2 w-2 bg-[#7ebc45]" />
               <span className="text-sm font-semibold">Companies With Active Openings</span>
             </div>
 
             <h1 className="text-4xl font-bold leading-tight md:text-6xl">
               Explore the companies
               <br />
-              <span className="text-lime-400">actively hiring CSU students</span>
+              <span className="text-[#7ebc45]">actively hiring CSU students</span>
             </h1>
 
-            <p className="mt-5 max-w-2xl text-lg text-teal-50">
+            <p className="mt-5 max-w-2xl text-lg text-white/90">
               Browse employer profiles backed by the backend seed data and jump straight into the roles that are open now.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-teal-100">
+            <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-white/85">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-lime-400" aria-hidden="true" />
+                <Building2 className="h-5 w-5 text-[#7ebc45]" aria-hidden="true" />
                 <span>{companies.length} hiring companies</span>
               </div>
               <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-lime-400" aria-hidden="true" />
+                <Briefcase className="h-5 w-5 text-[#7ebc45]" aria-hidden="true" />
                 <span>{companies.reduce((sum, company) => sum + company.job_count, 0)} live openings</span>
               </div>
             </div>
@@ -149,7 +149,7 @@ export function CompaniesPage() {
           <div className="border-b border-gray-200 bg-white px-6 py-5">
             <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
-                <div className="mb-2 inline-flex items-center gap-2 bg-teal-100 px-3 py-1 text-sm font-semibold text-teal-700">
+                <div className="mb-2 inline-flex items-center gap-2 border border-[#7ebc45] bg-white px-3 py-1 text-sm font-semibold text-[#2d694f]">
                   <Filter className="h-4 w-4" aria-hidden="true" />
                   Company Directory
                 </div>
@@ -159,7 +159,7 @@ export function CompaniesPage() {
                 </p>
               </div>
               <Link to="/jobs" className="shrink-0">
-                <Button className="bg-teal-700 font-semibold text-white hover:bg-teal-800">
+                <Button className="bg-[#2d694f] font-semibold text-white hover:bg-[#274c37]">
                   View All Jobs
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -176,7 +176,7 @@ export function CompaniesPage() {
                     <button
                       type="button"
                       onClick={clearFilters}
-                      className="text-sm font-medium text-teal-700 hover:text-teal-800"
+                      className="text-sm font-medium text-[#2d694f] hover:text-[#274c37]"
                     >
                       Clear
                     </button>
@@ -201,7 +201,7 @@ export function CompaniesPage() {
                   <select
                     value={locationFilter}
                     onChange={(e) => setLocationFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#2d694f] focus:outline-none focus:ring-2 focus:ring-[#2d694f]/20"
                   >
                     <option value="">All locations</option>
                     {locations.map((location) => (
@@ -217,7 +217,7 @@ export function CompaniesPage() {
                   <select
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#2d694f] focus:outline-none focus:ring-2 focus:ring-[#2d694f]/20"
                   >
                     <option value="">All roles</option>
                     {roles.map((role) => (
@@ -298,13 +298,13 @@ export function CompaniesPage() {
                           onClick={() => setSelectedCompanyId(company.id)}
                           className={`w-full border-l-4 px-6 py-5 text-left transition ${
                             isSelected
-                              ? "border-l-teal-700 bg-teal-50"
+                              ? "border-l-[#2d694f] bg-white"
                               : "border-l-transparent hover:bg-gray-50"
                           }`}
                         >
                           <div className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-teal-100">
-                              <Building2 className="h-6 w-6 text-teal-700" aria-hidden="true" />
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-[#2d694f] bg-white">
+                              <Building2 className="h-6 w-6 text-[#2d694f]" aria-hidden="true" />
                             </div>
 
                             <div className="min-w-0 flex-1">
@@ -316,7 +316,7 @@ export function CompaniesPage() {
                                     <span>{company.location}</span>
                                   </p>
                                 </div>
-                                <Badge className="bg-lime-100 text-lime-700 hover:bg-lime-100">
+                                <Badge className="border border-[#7ebc45] bg-white text-[#2d694f] hover:bg-white">
                                   {company.job_count} openings
                                 </Badge>
                               </div>
@@ -350,8 +350,8 @@ export function CompaniesPage() {
                     <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
                       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                         <div className="flex items-start gap-4">
-                          <div className="flex h-16 w-16 shrink-0 items-center justify-center bg-teal-100">
-                            <Building2 className="h-8 w-8 text-teal-700" aria-hidden="true" />
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-[#2d694f] bg-white">
+                            <Building2 className="h-8 w-8 text-[#2d694f]" aria-hidden="true" />
                           </div>
                           <div>
                             <h3 className="text-3xl font-bold text-gray-900">{selectedCompany.name}</h3>
@@ -360,7 +360,7 @@ export function CompaniesPage() {
                                 <MapPin className="mr-1 h-3 w-3" aria-hidden="true" />
                                 {selectedCompany.location}
                               </Badge>
-                              <Badge variant="secondary" className="bg-lime-100 text-lime-700">
+                              <Badge variant="secondary" className="border border-[#7ebc45] bg-white text-[#2d694f]">
                                 <Briefcase className="mr-1 h-3 w-3" aria-hidden="true" />
                                 {selectedCompany.job_count} active roles
                               </Badge>
@@ -375,7 +375,7 @@ export function CompaniesPage() {
                         </div>
 
                         <Link to="/jobs" className="shrink-0">
-                          <Button className="bg-teal-700 font-semibold text-white hover:bg-teal-800">
+                          <Button className="bg-[#2d694f] font-semibold text-white hover:bg-[#274c37]">
                             Explore Jobs
                             <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                           </Button>
@@ -420,8 +420,8 @@ export function CompaniesPage() {
                               className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
                             >
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center bg-teal-100">
-                                  <Briefcase className="h-5 w-5 text-teal-700" aria-hidden="true" />
+                                <div className="flex h-10 w-10 items-center justify-center border border-[#2d694f] bg-white">
+                                  <Briefcase className="h-5 w-5 text-[#2d694f]" aria-hidden="true" />
                                 </div>
                                 <div>
                                   <p className="font-semibold text-gray-900">{title}</p>
@@ -429,7 +429,7 @@ export function CompaniesPage() {
                                 </div>
                               </div>
                               <Link to="/jobs">
-                                <Button variant="outline" className="border-teal-300 text-teal-700 hover:bg-teal-50">
+                                <Button variant="outline" className="border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
                                   View
                                 </Button>
                               </Link>
@@ -445,7 +445,7 @@ export function CompaniesPage() {
                         </div>
                         <div className="flex flex-wrap gap-3">
                           {selectedCompany.open_roles.map((role) => (
-                            <Badge key={role} className="bg-teal-100 px-3 py-2 text-sm font-medium text-teal-700 hover:bg-teal-100">
+                            <Badge key={role} className="border border-[#2d694f] bg-white px-3 py-2 text-sm font-medium text-[#2d694f] hover:bg-white">
                               {role}
                             </Badge>
                           ))}

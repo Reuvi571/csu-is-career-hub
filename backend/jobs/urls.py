@@ -2,24 +2,26 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # =========================
-    # EXISTING (UI ROUTE)
-    # =========================
+    # UI ROUTE
     path('', views.dashboard, name='dashboard'),
 
-    # =========================
-    # EXISTING (TEMP FEATURE)
-    # =========================
+    # TEMP FEATURE
     path('api/mdn/<str:skill_name>/', views.mdn_popup, name='mdn_popup'),
 
-    # =========================
-    # NEW (REAL API)
-    # =========================
+    # REAL API
+    path('api/auth/login/', views.login_api, name='login_api'),
+    path('api/auth/logout/', views.logout_api, name='logout_api'),
+    path('api/auth/me/', views.current_user_api, name='current_user_api'),
     path('api/jobs/', views.get_jobs, name='get_jobs'),
-
     path('api/reviews/', views.reviews_api, name='reviews_api'),
+    path('api/reviews/submit/', views.submit_review_api, name='submit_review_api'),
+    path('api/admin/reviews/', views.admin_reviews_api, name='admin_reviews_api'),
+    path('api/admin/reviews/<int:review_id>/moderate/', views.moderate_review_api, name='moderate_review_api'),
+    path('api/admin/jobs/', views.admin_jobs_api, name='admin_jobs_api'),
+    path('api/admin/jobs/<uuid:job_id>/moderate/', views.moderate_job_api, name='moderate_job_api'),
+    path('api/salaries/', views.salaries_api, name='salaries_api'),
     path('api/companies/', views.companies_api, name='companies_api'),
-
+    path('api/companies/<int:company_id>/', views.company_detail_api, name='company_detail_api'),
     path('api/certifications/', views.certifications_api, name='certifications_api'),
     path('api/certifications/<int:cert_id>/', views.certification_detail_api, name='certification_detail_api'),
 ]

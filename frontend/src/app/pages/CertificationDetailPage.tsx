@@ -59,7 +59,7 @@ export function CertificationDetailPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center items-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d694f]"></div>
       </div>
     );
   }
@@ -93,7 +93,7 @@ export function CertificationDetailPage() {
       <div className="bg-white rounded-lg shadow-sm border p-8 mb-8">
         <div className="flex items-start gap-4">
           <div className="text-5xl">
-            <Award className="h-12 w-12 text-yellow-500" />
+            <Award className="h-12 w-12 text-[#7ebc45]" />
           </div>
           <div className="flex-1">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
@@ -120,7 +120,7 @@ export function CertificationDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-blue-600" />
+                  <Briefcase className="h-5 w-5 text-[#2d694f]" />
                   Applicable Roles
                 </CardTitle>
               </CardHeader>
@@ -144,7 +144,7 @@ export function CertificationDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-green-600" />
+                <Briefcase className="h-5 w-5 text-[#2d694f]" />
                 Related Job Postings
               </CardTitle>
               <p className="text-sm font-medium text-gray-600 mt-2">
@@ -161,7 +161,7 @@ export function CertificationDetailPage() {
                   {cert.job_postings.map((job) => (
                     <div
                       key={job.id}
-                      className="p-4 border rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
+                      className="p-4 border rounded-lg hover:border-[#2d694f] transition-colors cursor-pointer"
                       onClick={() => navigate(`/jobs`)}
                     >
                       <h4 className="font-semibold text-gray-900 mb-1">
@@ -212,7 +212,7 @@ export function CertificationDetailPage() {
                 </p>
               </div>
               <Button
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-[#2d694f] hover:bg-[#274c37]"
                 onClick={() => navigate("/certifications")}
               >
                 View All Certifications

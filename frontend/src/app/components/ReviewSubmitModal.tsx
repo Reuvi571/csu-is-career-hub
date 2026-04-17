@@ -11,22 +11,31 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Company, User } from "../data/mockData";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
+
+interface ReviewCompany {
+  id?: number;
+  name: string;
+  internshipRoles: string[];
+}
+
+interface ReviewUser {
+  id?: string;
+  name?: string;
+}
 
 interface ReviewSubmitModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  company: Company;
-  user: User;
+  company: ReviewCompany;
+  user?: ReviewUser;
 }
 
 export function ReviewSubmitModal({
   open,
   onOpenChange,
   company,
-  user,
 }: ReviewSubmitModalProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -39,27 +48,56 @@ export function ReviewSubmitModal({
   const [recommendation, setRecommendation] = useState("");
   const [skills, setSkills] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!rating || !internshipRole || !semester || !year || !pros || !cons || !interview || !recommendation) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    // In a real app, this would submit to backend
-    toast.success("Review submitted! It will be visible after admin approval.");
-    
-    // Reset form
-    setRating(0);
-    setInternshipRole("");
-    setSemester("");
-    setYear("");
-    setPros("");
-    setCons("");
-    setInterview("");
-    setRecommendation("");
-    setSkills("");
-    
-    onOpenChange(false);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/reviews/submit/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          company_id: company.id,
+          role: internshipRole === "other" ? "Other" : internshipRole,
+          rating,
+          pros,
+          cons,
+          interview_process: interview,
+          recommendation,
+          skills_used: skills
+            .split(",")
+            .map((skill) => skill.trim())
+            .filter(Boolean),
+          semester,
+          year,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to submit review");
+      }
+
+      toast.success("Review submitted. It will appear after admin approval.");
+
+      setRating(0);
+      setInternshipRole("");
+      setSemester("");
+      setYear("");
+      setPros("");
+      setCons("");
+      setInterview("");
+      setRecommendation("");
+      setSkills("");
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to submit review");
+    }
   };
 
   return (
@@ -81,7 +119,7 @@ export function ReviewSubmitModal({
                   key={value}
                   className={`h-8 w-8 cursor-pointer transition-colors ${
                     value <= (hoveredRating || rating)
-                      ? "fill-yellow-400 text-yellow-400"
+                      ? "fill-[#7ebc45] text-[#7ebc45]"
                       : "text-gray-300"
                   }`}
                   onMouseEnter={() => setHoveredRating(value)}

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-yluzxh)kf9)y-!!2i7h(&(p5x(+e05cl@nzn6msmjejvcz#n+2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]
 
 
 # Application definition
@@ -129,6 +129,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Allow frontend HTML file to access this API
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Tell Django to allow the custom headers HTMX uses
 CORS_ALLOW_HEADERS = [

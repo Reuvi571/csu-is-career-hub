@@ -52,7 +52,7 @@ export function AlumniPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl mb-3 flex items-center">
-          <GraduationCap className="h-10 w-10 mr-3 text-green-600" />
+          <GraduationCap className="h-10 w-10 mr-3 text-[#2d694f]" />
           CSU Alumni Network
         </h1>
         <p className="text-lg text-muted-foreground">
@@ -62,40 +62,40 @@ export function AlumniPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+        <Card className="border-[#2d694f] bg-white">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Alumni</p>
-                <p className="text-3xl font-bold text-green-700">{mockAlumniProfiles.length}</p>
+                <p className="text-3xl font-bold text-[#2d694f]">{mockAlumniProfiles.length}</p>
               </div>
-              <Users className="h-12 w-12 text-green-600 opacity-50" />
+              <Users className="h-12 w-12 text-[#2d694f] opacity-50" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+        <Card className="border-[#7ebc45] bg-white">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Available Mentors</p>
-                <p className="text-3xl font-bold text-blue-700">
+                <p className="text-3xl font-bold text-[#2d694f]">
                   {mockAlumniProfiles.filter((a) => a.willingToMentor).length}
                 </p>
               </div>
-              <Award className="h-12 w-12 text-blue-600 opacity-50" />
+              <Award className="h-12 w-12 text-[#7ebc45] opacity-60" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+        <Card className="border-[#274c37] bg-white">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Companies</p>
-                <p className="text-3xl font-bold text-purple-700">
+                <p className="text-3xl font-bold text-[#274c37]">
                   {new Set(mockAlumniProfiles.map((a) => a.companyId)).size}
                 </p>
               </div>
-              <Briefcase className="h-12 w-12 text-purple-600 opacity-50" />
+              <Briefcase className="h-12 w-12 text-[#274c37] opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -179,7 +179,7 @@ export function AlumniPage() {
               <CardHeader>
                 <div className="flex items-start space-x-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarFallback className="text-lg bg-green-600 text-white">
+                    <AvatarFallback className="text-lg bg-[#2d694f] text-white">
                       {getInitials(alumni.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -189,7 +189,7 @@ export function AlumniPage() {
                       Class of {alumni.graduationYear}
                     </CardDescription>
                     {alumni.willingToMentor && (
-                      <Badge variant="default" className="mt-2 bg-green-600">
+                      <Badge variant="default" className="mt-2 bg-[#2d694f]">
                         <Award className="h-3 w-3 mr-1" />
                         Available to Mentor
                       </Badge>
@@ -205,7 +205,7 @@ export function AlumniPage() {
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm truncate">{alumni.currentRole}</p>
                       <Link to={`/companies/${alumni.companyId}`}>
-                        <p className="text-sm text-green-600 hover:underline flex items-center">
+                        <p className="text-sm text-[#2d694f] hover:underline flex items-center">
                           {getCompanyEmoji(alumni.companyId)} {alumni.currentCompany}
                           <ExternalLink className="h-3 w-3 ml-1" />
                         </p>
@@ -274,7 +274,7 @@ export function AlumniPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Button variant="default" size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                      <Button variant="default" size="sm" className="w-full bg-[#2d694f] hover:bg-[#274c37]">
                         <Linkedin className="h-4 w-4 mr-2" />
                         LinkedIn
                       </Button>
@@ -288,10 +288,10 @@ export function AlumniPage() {
       )}
 
       {/* CTA Section */}
-      <Card className="mt-12 bg-gradient-to-r from-green-800 via-green-900 to-gray-900 text-white border-0">
+      <Card className="mt-12 bg-[#2d694f] text-white border-0">
         <CardContent className="py-12 text-center">
           <h2 className="text-3xl mb-4">Want to Join the Alumni Network?</h2>
-          <p className="text-lg mb-6 text-green-100">
+          <p className="text-lg mb-6 text-white/85">
             Graduate, land your dream job, and come back to help the next generation of Vikings! 🎓
           </p>
           <div className="flex justify-center space-x-4">

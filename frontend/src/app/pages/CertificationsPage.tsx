@@ -69,7 +69,7 @@ export function CertificationsPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-8 flex justify-center items-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d694f]"></div>
       </div>
     );
   }
@@ -115,19 +115,19 @@ export function CertificationsPage() {
           {filteredCertifications.map((cert) => (
             <div
               key={cert.id}
-              className="border rounded-lg p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer bg-white"
+              className="border rounded-lg p-6 hover:shadow-lg hover:border-[#2d694f] transition-all cursor-pointer bg-white"
               onClick={() => navigate(`/certifications/${cert.id}`)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-blue-600 mb-1">
+                  <h3 className="text-lg font-semibold text-[#2d694f] mb-1">
                     {cert.name}
                   </h3>
                   <p className="text-sm text-gray-600 font-medium">
                     {cert.organization}
                   </p>
                 </div>
-                <Award className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                <Award className="h-5 w-5 text-[#7ebc45] flex-shrink-0" />
               </div>
 
               <p className="text-gray-700 text-sm mb-4 line-clamp-2">

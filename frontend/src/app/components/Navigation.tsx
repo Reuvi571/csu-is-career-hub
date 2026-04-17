@@ -1,24 +1,18 @@
 import { Link, useLocation } from "react-router";
-import { User } from "../data/mockData";
+import { User } from "../types/user";
 import { Button } from "./ui/button";
-import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House, Settings, ArrowRightLeft } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 
 interface NavigationProps {
   user: User | null;
   onLoginClick: () => void;
   onLogout: () => void;
+  onSwitchAccount: () => void;
 }
 
-export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
+export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: NavigationProps) {
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -47,7 +41,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#00795f]">
+    <nav className="sticky top-0 z-50 bg-[#2d694f]">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section - Left */}
@@ -55,7 +49,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
             <div className="flex flex-col justify-start leading-tight">
               <div className="text-sm font-bold text-white tracking-tight">
                 <span>CSU</span>
-                <span className="ml-1 font-black text-[#8dc63f]">IS</span>
+                <span className="ml-1 font-black text-[#7ebc45]">IS</span>
               </div>
               <div className="text-xs font-semibold text-white/85">Careers</div>
             </div>
@@ -71,8 +65,8 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                   to={item.path}
                   className={`flex items-center space-x-1 text-sm font-semibold transition-colors ${
                     isActive(item.path)
-                      ? "text-[#b5d334]"
-                      : "text-white hover:text-[#b5d334]"
+                      ? "text-[#7ebc45]"
+                      : "text-white hover:text-[#7ebc45]"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -94,8 +88,8 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                     to={item.path}
                     className={`flex items-center space-x-1 text-sm font-semibold transition-colors ${
                       isActive(item.path)
-                        ? "text-[#b5d334]"
-                        : "text-white hover:text-[#b5d334]"
+                        ? "text-[#7ebc45]"
+                        : "text-white hover:text-[#7ebc45]"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -107,48 +101,82 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
 
             {/* User Section */}
             {user ? (
-              <div className="flex items-center space-x-4">
-                {user.role === "admin" && (
-                  <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-[#00684f] hover:text-[#b5d334]">
-                      <Shield className="h-4 w-4 mr-1" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-none hover:bg-[#00684f]">
-                      <Avatar>
-                        <AvatarFallback className="bg-[#8dc63f] font-semibold text-[#00795f]">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" className="relative h-12 w-12 rounded-none p-0 hover:bg-[#274c37]">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-[#7ebc45] font-semibold text-[#2d694f]">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[340px] max-w-none rounded-none border-l-[#d5d8db] p-0">
+                  <SheetHeader className="border-b border-[#d5d8db] bg-[#2d694f] p-6 text-left">
+                    <div className="flex items-center gap-4 pr-8">
+                      <Avatar className="h-14 w-14">
+                        <AvatarFallback className="bg-[#7ebc45] text-lg font-semibold text-[#2d694f]">
                           {getInitials(user.name)}
                         </AvatarFallback>
                       </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-600">{user.email}</p>
-                        <p className="text-xs text-gray-600 capitalize">
+                      <div className="min-w-0">
+                        <SheetTitle className="truncate text-white">{user.name}</SheetTitle>
+                        <SheetDescription className="mt-1 text-white/80">
+                          {user.email}
+                          <br />
                           {user.role}
                           {user.graduationYear && ` • Class of ${user.graduationYear}`}
-                        </p>
+                        </SheetDescription>
                       </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onLogout}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                    </div>
+                  </SheetHeader>
+
+                  <div className="flex flex-1 flex-col gap-3 p-6">
+                    {user.role === "admin" && (
+                      <Link to="/admin">
+                        <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Button>
+                      </Link>
+                    )}
+
+                    <div className="rounded-none border border-[#d5d8db] bg-white p-4">
+                      <div className="flex items-center gap-3">
+                        <Settings className="h-5 w-5 text-[#2d694f]" />
+                        <div>
+                          <p className="text-sm font-semibold text-[#2d694f]">Account Settings</p>
+                          <p className="text-xs text-[#5f6368]">Profile editing can be added here next.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {user.role === "admin" && (
+                      <Button
+                        variant="outline"
+                        onClick={onSwitchAccount}
+                        className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]"
+                      >
+                        <ArrowRightLeft className="mr-2 h-4 w-4" />
+                        Switch Account
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      onClick={onLogout}
+                      className="w-full justify-start rounded-none border-[#274c37] text-[#274c37] hover:bg-white"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
             ) : (
               <Button 
                 onClick={onLoginClick} 
-                className="h-10 bg-[#8dc63f] px-4 py-2 font-semibold text-[#00795f] hover:bg-[#79b52c]"
+                className="h-10 bg-[#7ebc45] px-4 py-2 font-semibold text-[#2d694f] hover:bg-[#274c37] hover:text-white"
               >
                 Sign In
               </Button>

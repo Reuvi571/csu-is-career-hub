@@ -12,6 +12,17 @@ interface RootContext {
   openAuthModal: () => void;
 }
 
+const ALLOWED_DOCUMENT_EXTENSIONS = [".pdf", ".doc", ".docx"];
+
+function isAcceptedDocument(file: File | null) {
+  if (!file) {
+    return false;
+  }
+
+  const fileName = file.name.toLowerCase();
+  return ALLOWED_DOCUMENT_EXTENSIONS.some((extension) => fileName.endsWith(extension));
+}
+
 export function DocumentsPage() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -91,9 +102,16 @@ export function DocumentsPage() {
   };
 
   const onDropFile = (file: File | null) => {
-    if (file) {
-      setResumeFile(file);
+    if (!file) {
+      return;
     }
+
+    if (!isAcceptedDocument(file)) {
+      toast.error("Resume files must be PDF, DOC, or DOCX.");
+      return;
+    }
+
+    setResumeFile(file);
   };
 
   return (
@@ -168,10 +186,11 @@ export function DocumentsPage() {
             >
               <Upload className="mx-auto h-8 w-8 text-[#2d694f]" />
               <p className="mt-3 font-semibold text-[#2d694f]">Drag and drop a resume here</p>
-              <p className="mt-1 text-sm text-[#5f6368]">or choose a file from your computer</p>
+              <p className="mt-1 text-sm text-[#5f6368]">or choose a PDF, DOC, or DOCX file from your computer</p>
               <input
                 ref={inputRef}
                 type="file"
+                accept=".pdf,.doc,.docx"
                 className="hidden"
                 onChange={(event) => onDropFile(event.target.files?.[0] ?? null)}
               />

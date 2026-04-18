@@ -48,6 +48,17 @@ interface JobsBoardProps {
   savedOnly?: boolean;
 }
 
+const ALLOWED_DOCUMENT_EXTENSIONS = [".pdf", ".doc", ".docx"];
+
+function isAcceptedDocument(file: File | null) {
+  if (!file) {
+    return false;
+  }
+
+  const fileName = file.name.toLowerCase();
+  return ALLOWED_DOCUMENT_EXTENSIONS.some((extension) => fileName.endsWith(extension));
+}
+
 export function JobsBoard({
   jobs,
   loading = false,
@@ -202,6 +213,33 @@ export function JobsBoard({
     }
   };
 
+  const handleResumeOverride = (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    if (!isAcceptedDocument(file)) {
+      toast.error("Resume files must be PDF, DOC, or DOCX.");
+      return;
+    }
+
+    setResumeOverride(file);
+    setUseDefaultResume(false);
+  };
+
+  const handleCoverLetterUpload = (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    if (!isAcceptedDocument(file)) {
+      toast.error("Cover letters must be PDF, DOC, or DOCX.");
+      return;
+    }
+
+    setCoverLetterFile(file);
+  };
+
   const submitInternalApplication = async () => {
     if (!selectedJob) {
       return;
@@ -313,27 +351,18 @@ export function JobsBoard({
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={(event) => {
                     event.preventDefault();
-                    const nextFile = event.dataTransfer.files?.[0] ?? null;
-                    setResumeOverride(nextFile);
-                    if (nextFile) {
-                      setUseDefaultResume(false);
-                    }
+                    handleResumeOverride(event.dataTransfer.files?.[0] ?? null);
                   }}
                 >
                   <Upload className="mx-auto h-7 w-7 text-[#2d694f]" />
                   <p className="mt-3 font-semibold text-[#2d694f]">Use a different resume</p>
-                  <p className="mt-1 text-sm text-[#5f6368]">Upload a replacement resume for this application only.</p>
+                  <p className="mt-1 text-sm text-[#5f6368]">Upload a replacement PDF, DOC, or DOCX resume for this application only.</p>
                   <input
                     ref={resumeInputRef}
                     type="file"
+                    accept=".pdf,.doc,.docx"
                     className="hidden"
-                    onChange={(event) => {
-                      const nextFile = event.target.files?.[0] ?? null;
-                      setResumeOverride(nextFile);
-                      if (nextFile) {
-                        setUseDefaultResume(false);
-                      }
-                    }}
+                    onChange={(event) => handleResumeOverride(event.target.files?.[0] ?? null)}
                   />
                   <Button
                     variant="outline"
@@ -371,17 +400,18 @@ export function JobsBoard({
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={(event) => {
                     event.preventDefault();
-                    setCoverLetterFile(event.dataTransfer.files?.[0] ?? null);
+                    handleCoverLetterUpload(event.dataTransfer.files?.[0] ?? null);
                   }}
                 >
                   <Upload className="mx-auto h-7 w-7 text-[#2d694f]" />
                   <p className="mt-3 font-semibold text-[#2d694f]">Attach a cover letter</p>
-                  <p className="mt-1 text-sm text-[#5f6368]">Optional for CSU-hosted applications.</p>
+                  <p className="mt-1 text-sm text-[#5f6368]">Optional PDF, DOC, or DOCX file for CSU-hosted applications.</p>
                   <input
                     ref={coverLetterInputRef}
                     type="file"
+                    accept=".pdf,.doc,.docx"
                     className="hidden"
-                    onChange={(event) => setCoverLetterFile(event.target.files?.[0] ?? null)}
+                    onChange={(event) => handleCoverLetterUpload(event.target.files?.[0] ?? null)}
                   />
                   <Button
                     variant="outline"

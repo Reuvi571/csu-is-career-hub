@@ -13,6 +13,7 @@ import json
 
 
 User = get_user_model()
+ALLOWED_DOCUMENT_EXTENSIONS = {".pdf", ".doc", ".docx"}
 
 
 def csv_to_list(value):
@@ -26,6 +27,19 @@ def split_name(name):
 
     parts = cleaned.split(" ", 1)
     return parts[0], parts[1] if len(parts) > 1 else ""
+
+
+def validate_document_upload(uploaded_file, field_label):
+    if not uploaded_file:
+        return None
+
+    file_name = (uploaded_file.name or "").strip()
+    extension = f".{file_name.rsplit('.', 1)[-1].lower()}" if "." in file_name else ""
+
+    if extension not in ALLOWED_DOCUMENT_EXTENSIONS:
+        return f"{field_label} must be a PDF, DOC, or DOCX file."
+
+    return None
 
 
 def format_hourly_range(min_rate, max_rate):
@@ -688,6 +702,10 @@ def profile_documents_api(request):
     if not resume_file:
         return JsonResponse({"error": "A resume file is required"}, status=400)
 
+    validation_error = validate_document_upload(resume_file, "Resume")
+    if validation_error:
+        return JsonResponse({"error": validation_error}, status=400)
+
     if profile.default_resume:
         profile.default_resume.delete(save=False)
 
@@ -823,6 +841,14 @@ def apply_to_job_api(request, job_id):
     use_default_resume = request.POST.get("use_default_resume", "false").lower() == "true"
     uploaded_resume = request.FILES.get("resume_file")
     uploaded_cover_letter = request.FILES.get("cover_letter_file")
+
+    resume_validation_error = validate_document_upload(uploaded_resume, "Resume")
+    if resume_validation_error:
+        return JsonResponse({"error": resume_validation_error}, status=400)
+
+    cover_letter_validation_error = validate_document_upload(uploaded_cover_letter, "Cover letter")
+    if cover_letter_validation_error:
+        return JsonResponse({"error": cover_letter_validation_error}, status=400)
 
     if not use_default_resume and not uploaded_resume:
         return JsonResponse({"error": "Attach a resume or use the default resume on your account"}, status=400)

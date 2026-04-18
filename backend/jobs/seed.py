@@ -2,13 +2,14 @@ import os
 import sys
 import django
 import re
+from django.core.files.base import ContentFile
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from jobs.models import Company, Role, Certification, JobPosting, CompanyReview, SalaryReport, CareerUserProfile
+from jobs.models import Company, Role, Certification, JobPosting, CompanyReview, SalaryReport, CareerUserProfile, Alumni, SavedJob, SavedCompany, SavedCertification, SavedAlumni, JobApplication
 from django.utils import timezone
 
 User = get_user_model()
@@ -35,10 +36,28 @@ def infer_position_type(title, experience_level):
     return "internship"
 
 
+def slugify_for_url(value):
+    cleaned = re.sub(r"[^a-z0-9]+", "-", (value or "").strip().lower())
+    return cleaned.strip("-")
+
+
+def build_apply_url(company, title):
+    company_slug = slugify_for_url(company.name)
+    title_slug = slugify_for_url(title)
+    domain = company.website or "example.com"
+    return f"https://{domain}/careers/{title_slug}?source=csu-is-career-hub"
+
+
 def run():
     # reset
     CareerUserProfile.objects.all().delete()
     User.objects.exclude(is_superuser=True).delete()
+    SavedJob.objects.all().delete()
+    SavedCompany.objects.all().delete()
+    SavedCertification.objects.all().delete()
+    SavedAlumni.objects.all().delete()
+    JobApplication.objects.all().delete()
+    Alumni.objects.all().delete()
     JobPosting.objects.all().delete()
     CompanyReview.objects.all().delete()
     SalaryReport.objects.all().delete()
@@ -90,77 +109,92 @@ def run():
         "SQL": Certification.objects.create(
             name="SQL Certificate",
             description="Master SQL fundamentals including queries, joins, aggregations, and database design. Essential for data professionals.",
-            organization="Various providers (Microsoft, Oracle, etc.)"
+            organization="Various providers (Microsoft, Oracle, etc.)",
+            official_url="https://learn.microsoft.com/en-us/credentials/",
         ),
         "PowerBI": Certification.objects.create(
             name="Power BI Certificate",
             description="Learn data visualization and business analytics using Microsoft Power BI. Create interactive dashboards and reports.",
-            organization="Microsoft"
+            organization="Microsoft",
+            official_url="https://learn.microsoft.com/en-us/credentials/certifications/power-bi-data-analyst-associate/",
         ),
         "HTMLCSS": Certification.objects.create(
             name="HTML/CSS Certificate",
             description="Build strong foundation in web markup and styling. Essential for front-end development and web design.",
-            organization="Various providers"
+            organization="Various providers",
+            official_url="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content",
         ),
         "JS": Certification.objects.create(
             name="JavaScript Certificate",
             description="Master JavaScript programming language for client-side and server-side development. Core skill for web developers.",
-            organization="Various providers"
+            organization="Various providers",
+            official_url="https://developer.mozilla.org/en-US/docs/Web/JavaScript",
         ),
         "React": Certification.objects.create(
             name="React Certificate",
             description="Learn React library for building dynamic user interfaces. Includes components, hooks, state management.",
-            organization="Meta/Facebook"
+            organization="Meta/Facebook",
+            official_url="https://www.coursera.org/professional-certificates/meta-front-end-developer",
         ),
         "AWS": Certification.objects.create(
             name="AWS Cloud Practitioner",
             description="Foundational cloud computing certification covering AWS services, architecture, and best practices.",
-            organization="Amazon Web Services"
+            organization="Amazon Web Services",
+            official_url="https://aws.amazon.com/certification/certified-cloud-practitioner/",
         ),
         "Azure": Certification.objects.create(
             name="Azure Fundamentals",
             description="Introduction to Microsoft Azure cloud services and cloud computing concepts.",
-            organization="Microsoft"
+            organization="Microsoft",
+            official_url="https://learn.microsoft.com/en-us/credentials/certifications/azure-fundamentals/",
         ),
         "UX": Certification.objects.create(
             name="UI/UX Design Certificate",
             description="Learn user interface and user experience design principles, tools like Figma, and design thinking methodologies.",
-            organization="Various providers"
+            organization="Various providers",
+            official_url="https://www.coursera.org/professional-certificates/google-ux-design",
         ),
         "Git": Certification.objects.create(
             name="Git/GitHub Certificate",
             description="Master version control using Git and GitHub. Essential for collaborative software development.",
-            organization="GitHub/Linux Foundation"
+            organization="GitHub/Linux Foundation",
+            official_url="https://skills.github.com/",
         ),
         "Tableau": Certification.objects.create(
             name="Tableau Desktop Specialist",
             description="Validate foundational Tableau skills for building dashboards, visual analysis, and communicating insights to stakeholders.",
-            organization="Tableau"
+            organization="Tableau",
+            official_url="https://www.tableau.com/learn/certification/desktop-specialist",
         ),
         "Salesforce": Certification.objects.create(
             name="Salesforce Administrator",
             description="Learn CRM configuration, reports, automation, and security concepts used in many business systems roles.",
-            organization="Salesforce"
+            organization="Salesforce",
+            official_url="https://trailheadacademy.salesforce.com/credentials/administratoroverview/",
         ),
         "SecurityPlus": Certification.objects.create(
             name="CompTIA Security+",
             description="Covers core cybersecurity principles including risk management, network security, identity, and incident response.",
-            organization="CompTIA"
+            organization="CompTIA",
+            official_url="https://www.comptia.org/certifications/security",
         ),
         "NetworkPlus": Certification.objects.create(
             name="CompTIA Network+",
             description="Build practical knowledge of networking fundamentals, troubleshooting, protocols, and infrastructure support.",
-            organization="CompTIA"
+            organization="CompTIA",
+            official_url="https://www.comptia.org/certifications/network",
         ),
         "Python": Certification.objects.create(
             name="Python Programming Certificate",
             description="Develop Python skills for automation, scripting, data processing, and back-end application development.",
-            organization="Various providers"
+            organization="Various providers",
+            official_url="https://www.python.org/about/gettingstarted/",
         ),
         "Agile": Certification.objects.create(
             name="Certified ScrumMaster",
             description="Understand Agile delivery, Scrum ceremonies, team collaboration, and iterative product development workflows.",
-            organization="Scrum Alliance"
+            organization="Scrum Alliance",
+            official_url="https://www.scrumalliance.org/get-certified/scrum-master-track/certified-scrummaster",
         ),
     }
 
@@ -231,8 +265,26 @@ def run():
             role=user_data["role"],
             graduation_year=user_data["graduation_year"],
             major=user_data["major"],
+            target_roles="Data Analyst, Software Developer" if user_data["role"] == "student" else "",
+            seeking_types="internship, entry_level" if user_data["role"] == "student" else "",
+            preferred_location="Cleveland, OH" if user_data["role"] == "student" else "",
+            bio="Interested in internships and early-career CSU IS opportunities." if user_data["role"] == "student" else "",
         )
         users[user_data["key"]] = user
+
+    student_profile = users["student"].career_profile
+    student_profile.default_resume.save(
+        "sarah-johnson-resume.pdf",
+        ContentFile(b"CSU IS Career Hub demo resume for Sarah Johnson."),
+        save=True,
+    )
+
+    alumni_profile = users["alumni"].career_profile
+    alumni_profile.default_resume.save(
+        "michael-chen-resume.pdf",
+        ContentFile(b"CSU IS Career Hub demo resume for Michael Chen."),
+        save=True,
+    )
 
     def create_job(
         title,
@@ -243,6 +295,7 @@ def run():
         salary_range,
         cert_list,
         role_list,
+        application_type="company_site",
     ):
         min_hourly_rate, max_hourly_rate = parse_hourly_range(salary_range)
 
@@ -253,6 +306,8 @@ def run():
             description=description,
             experience_level=experience_level,
             position_type=infer_position_type(title, experience_level),
+            application_type=application_type,
+            apply_url=build_apply_url(company, title) if application_type == "company_site" else "",
             min_hourly_rate=min_hourly_rate,
             max_hourly_rate=max_hourly_rate,
         )
@@ -273,6 +328,7 @@ def run():
             "description": "Support UI enhancements for internal product teams and help maintain reusable front-end components.",
             "experience_level": "Internship",
             "salary_range": "$21/hr - $24/hr",
+            "application_type": "csu_internal",
             "skills": ["HTML", "CSS", "JavaScript", "React"],
             "certs": [certs["HTMLCSS"], certs["JS"], certs["React"]],
             "roles": [roles["Frontend"]],
@@ -284,6 +340,7 @@ def run():
             "description": "Analyze operational data, build recurring reports, and present insights to analytics and business teams.",
             "experience_level": "Internship",
             "salary_range": "$23/hr - $27/hr",
+            "application_type": "csu_internal",
             "skills": ["SQL", "Excel", "Power BI"],
             "certs": [certs["SQL"], certs["PowerBI"], certs["Tableau"]],
             "roles": [roles["Data"]],
@@ -295,6 +352,7 @@ def run():
             "description": "Document business requirements, prepare process maps, and help coordinate enhancements across banking systems.",
             "experience_level": "Internship",
             "salary_range": "$22/hr - $25/hr",
+            "application_type": "csu_internal",
             "skills": ["Excel", "SQL", "Communication"],
             "certs": [certs["SQL"], certs["Azure"], certs["Agile"]],
             "roles": [roles["Business"]],
@@ -306,6 +364,7 @@ def run():
             "description": "Provide first-line technical support for clinical and administrative users across enterprise systems.",
             "experience_level": "Internship",
             "salary_range": "$19/hr - $22/hr",
+            "application_type": "csu_internal",
             "skills": ["Troubleshooting", "Networking", "Customer Service"],
             "certs": [certs["AWS"], certs["Azure"], certs["NetworkPlus"]],
             "roles": [roles["IT"]],
@@ -317,6 +376,7 @@ def run():
             "description": "Assist with wireframes, prototypes, and user testing artifacts for product design teams.",
             "experience_level": "Internship",
             "salary_range": "$20/hr - $24/hr",
+            "application_type": "csu_internal",
             "skills": ["Figma", "Wireframing", "Prototyping"],
             "certs": [certs["UX"], certs["HTMLCSS"], certs["Agile"]],
             "roles": [roles["UX"]],
@@ -372,6 +432,7 @@ def run():
             "description": "Respond to product issues, document resolutions, and escalate technical problems to engineering partners.",
             "experience_level": "Internship",
             "salary_range": "$18/hr - $21/hr",
+            "application_type": "csu_internal",
             "skills": ["Communication", "Troubleshooting", "Ticketing Systems"],
             "certs": [certs["HTMLCSS"], certs["UX"], certs["NetworkPlus"]],
             "roles": [roles["Support"]],
@@ -493,6 +554,7 @@ def run():
             "description": "Support mortgage platform reporting, user requests, and data cleanup for digital lending tools.",
             "experience_level": "Internship",
             "salary_range": "$21/hr - $24/hr",
+            "application_type": "csu_internal",
             "skills": ["Excel", "SQL", "Reporting"],
             "certs": [certs["SQL"], certs["PowerBI"], certs["Salesforce"]],
             "roles": [roles["Business"], roles["Data"]],
@@ -515,6 +577,7 @@ def run():
             "description": "Assist delivery teams supporting payment systems through testing, analysis, and requirements documentation.",
             "experience_level": "Internship",
             "salary_range": "$23/hr - $27/hr",
+            "application_type": "csu_internal",
             "skills": ["Testing", "Requirements", "Documentation"],
             "certs": [certs["Agile"], certs["Azure"], certs["Git"]],
             "roles": [roles["Business"], roles["Systems"]],
@@ -663,6 +726,7 @@ def run():
             job_data["salary_range"],
             job_data["certs"],
             job_data["roles"],
+            job_data.get("application_type", "company_site"),
         )
 
     # -------------------
@@ -751,6 +815,171 @@ def run():
             max_hourly_rate=report["max_hourly_rate"],
             posting_count=report["posting_count"],
         )
+
+    alumni_seed_data = [
+        {
+            "name": "Michael Chen",
+            "company": companies["Progressive"],
+            "role": "Data Analyst",
+            "headline": "CSU IS alum working on pricing and claims analytics.",
+            "location": "Cleveland, OH",
+            "bio": "Michael moved from a CSU analytics internship into a full-time analyst role and now works on reporting pipelines used by business stakeholders.",
+            "how_they_got_there": "He started with a Progressive internship, built stronger SQL and dashboard samples during the semester, and stayed in touch with his internship manager before applying for the full-time opening.",
+            "experience_highlights": "Worked on internal dashboards, stakeholder reporting, and translating business questions into clear datasets and visuals.",
+            "advice_for_students": "Bring examples of how you cleaned up messy data and explain how your analysis influenced a decision. Employers respond well to that more than generic tool lists.",
+            "internship_history": "Progressive Data Analyst Intern | CSU analytics capstone project",
+            "skills": "SQL, Power BI, Tableau, Excel, Stakeholder Communication",
+            "is_mentor": True,
+            "open_to_questions": True,
+            "open_to_referrals": False,
+            "email": "michael.chen.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/michael-chen-csu",
+            "graduation_year": 2024,
+        },
+        {
+            "name": "Alyssa Brooks",
+            "company": companies["Hyland"],
+            "role": "Software Developer",
+            "headline": "Former CSU front-end intern now building internal product tools.",
+            "location": "Westlake, OH",
+            "bio": "Alyssa interned in UI engineering and returned to Hyland full time after graduation, focusing on component work and product enhancements.",
+            "how_they_got_there": "Her internship conversion came after she documented the impact of a design-system cleanup project and kept a polished GitHub portfolio ready for interviews.",
+            "experience_highlights": "Converted internship work into a full-time offer and now mentors students interested in front-end and product engineering roles.",
+            "advice_for_students": "Show code you can explain clearly. Even a small but polished project says more than a resume bullet full of buzzwords.",
+            "internship_history": "Hyland Front-End Developer Intern | CSU web development project lead",
+            "skills": "React, TypeScript, Design Systems, CSS, Git",
+            "is_mentor": True,
+            "open_to_questions": True,
+            "open_to_referrals": True,
+            "email": "alyssa.brooks.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/alyssa-brooks-csu",
+            "graduation_year": 2023,
+        },
+        {
+            "name": "David Patel",
+            "company": companies["KeyBank"],
+            "role": "Business Systems Analyst",
+            "headline": "Business systems alum supporting enterprise banking workflows.",
+            "location": "Cleveland, OH",
+            "bio": "David works with operations and product teams to document requirements, improve internal workflows, and support enterprise releases.",
+            "how_they_got_there": "He leveraged a CSU business analysis class project, a summer internship, and strong interview stories about process mapping and stakeholder communication.",
+            "experience_highlights": "Supports system enhancements, testing coordination, and requirements gathering for banking teams.",
+            "advice_for_students": "If you want analyst roles, practice explaining problems in business terms. Technical skill helps, but clarity wins interviews.",
+            "internship_history": "KeyBank Business Analyst Intern | Campus IT student employee",
+            "skills": "Requirements Gathering, Process Mapping, SQL, Testing, Communication",
+            "is_mentor": True,
+            "open_to_questions": True,
+            "open_to_referrals": False,
+            "email": "david.patel.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/david-patel-csu",
+            "graduation_year": 2022,
+        },
+        {
+            "name": "Jasmine Rivera",
+            "company": companies["MRI Software"],
+            "role": "Product Designer",
+            "headline": "CSU alum focused on product design and user research.",
+            "location": "Solon, OH",
+            "bio": "Jasmine turned a CSU UX portfolio and internship experience into a design role where she supports research, prototyping, and workflow design.",
+            "how_they_got_there": "She built a stronger portfolio after internship feedback, refined her case studies, and used alumni outreach to learn how product teams reviewed design candidates.",
+            "experience_highlights": "Runs usability research, supports design critiques, and partners with developers on user-facing features.",
+            "advice_for_students": "Your portfolio should explain the problem, the tradeoffs, and the outcome. That matters more than visual polish alone.",
+            "internship_history": "MRI Software UI/UX Design Intern | CSU product design studio",
+            "skills": "Figma, User Research, Prototyping, Design Systems, Facilitation",
+            "is_mentor": True,
+            "open_to_questions": True,
+            "open_to_referrals": False,
+            "email": "jasmine.rivera.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/jasmine-rivera-csu",
+            "graduation_year": 2024,
+        },
+        {
+            "name": "Ethan Walker",
+            "company": companies["IBM"],
+            "role": "Cloud Operations Engineer",
+            "headline": "Cloud-focused alum who moved from internship support work into platform operations.",
+            "location": "Hybrid / Ohio",
+            "bio": "Ethan works with cloud environments, automation tasks, and support workflows that keep internal platforms stable and deployable.",
+            "how_they_got_there": "He used a mix of AWS certification prep, scripting projects, and internship exposure to automation tasks to position himself for cloud operations work.",
+            "experience_highlights": "Supports CI pipelines, automation tasks, and incident follow-up across cloud environments.",
+            "advice_for_students": "Certifications help, but pair them with one or two projects that show you actually used the tools.",
+            "internship_history": "IBM Cloud Operations Intern | Student IT support",
+            "skills": "AWS, Azure, Python, Automation, Incident Response",
+            "is_mentor": False,
+            "open_to_questions": True,
+            "open_to_referrals": True,
+            "email": "ethan.walker.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/ethan-walker-csu",
+            "graduation_year": 2023,
+        },
+        {
+            "name": "Brianna Lopez",
+            "company": companies["Cleveland Clinic"],
+            "role": "Systems Support Analyst",
+            "headline": "Healthcare systems alum supporting enterprise users and operational workflows.",
+            "location": "Cleveland, OH",
+            "bio": "Brianna supports enterprise users, triages issues, and helps clinical and business teams keep systems running smoothly.",
+            "how_they_got_there": "She built momentum through campus tech support work and a healthcare internship where she learned to communicate calmly and document issues clearly.",
+            "experience_highlights": "Supports ticket workflows, endpoint issues, and user communication for large enterprise systems.",
+            "advice_for_students": "Support roles are not small roles. If you can show reliability, documentation skills, and calm communication, you stand out quickly.",
+            "internship_history": "Cleveland Clinic IT Support Intern | Campus help desk",
+            "skills": "Troubleshooting, Documentation, Customer Support, Networking, ServiceNow",
+            "is_mentor": True,
+            "open_to_questions": True,
+            "open_to_referrals": False,
+            "email": "brianna.lopez.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/brianna-lopez-csu",
+            "graduation_year": 2021,
+        },
+        {
+            "name": "Noah Bennett",
+            "company": companies["Sherwin-Williams"],
+            "role": "Systems Analyst",
+            "headline": "Enterprise systems alum bridging operations and technology teams.",
+            "location": "Cleveland, OH",
+            "bio": "Noah works with reporting, testing, and systems coordination efforts tied to enterprise operations.",
+            "how_they_got_there": "He used internship work plus a strong capstone presentation to show he could translate operational needs into technical follow-up items.",
+            "experience_highlights": "Supports testing, reporting, and issue coordination in enterprise systems projects.",
+            "advice_for_students": "Keep examples that show how you organized ambiguity. That is a real skill in analyst and systems roles.",
+            "internship_history": "Sherwin-Williams ERP Support Intern | CSU systems analysis project",
+            "skills": "Systems Analysis, SQL, Testing, Documentation, ERP",
+            "is_mentor": False,
+            "open_to_questions": True,
+            "open_to_referrals": False,
+            "email": "noah.bennett.alumni@csu.edu",
+            "linkedin_url": "https://www.linkedin.com/in/noah-bennett-csu",
+            "graduation_year": 2022,
+        },
+    ]
+
+    for alumni in alumni_seed_data:
+        Alumni.objects.create(**alumni)
+
+    student_jobs = JobPosting.objects.order_by("-date_posted")[:2]
+    for job in student_jobs:
+        SavedJob.objects.create(user=users["student"], job=job)
+
+    internal_job = JobPosting.objects.filter(application_type="csu_internal").first()
+    if internal_job:
+        application = JobApplication.objects.create(user=users["student"], job=internal_job, status="submitted")
+        if users["student"].career_profile.default_resume:
+            users["student"].career_profile.default_resume.open("rb")
+            application.resume_file.save(
+                "sarah-johnson-applied-resume.pdf",
+                ContentFile(users["student"].career_profile.default_resume.read()),
+                save=False,
+            )
+            users["student"].career_profile.default_resume.close()
+        application.cover_letter_file.save(
+            "sarah-johnson-cover-letter.pdf",
+            ContentFile(b"Demo cover letter for a CSU-hosted application."),
+            save=False,
+        )
+        application.save()
+
+    SavedCompany.objects.create(user=users["student"], company=companies["Hyland"])
+    SavedCertification.objects.create(user=users["student"], certification=certs["AWS"])
+    SavedAlumni.objects.create(user=users["student"], alumni=Alumni.objects.get(name="Alyssa Brooks"))
 
     print("✅ FULL seed loaded )")
 

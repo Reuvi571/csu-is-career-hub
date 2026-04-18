@@ -30,6 +30,11 @@ class CareerUserProfile(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="student")
     graduation_year = models.IntegerField(blank=True, null=True)
     major = models.CharField(max_length=255, blank=True, default="Information Systems")
+    target_roles = models.TextField(blank=True, default="")
+    seeking_types = models.CharField(max_length=255, blank=True, default="")
+    preferred_location = models.CharField(max_length=255, blank=True, default="")
+    bio = models.TextField(blank=True, default="")
+    default_resume = models.FileField(upload_to="resumes/defaults/", blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.email} ({self.role})"
@@ -39,6 +44,7 @@ class Certification(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     organization = models.CharField(max_length=255, blank=True, null=True)
+    official_url = models.URLField(blank=True, default="")
     roles = models.ManyToManyField('Role', blank=True, related_name='certifications')
 
     def __str__(self):
@@ -79,6 +85,8 @@ class JobPosting(models.Model):
         choices=POSITION_TYPE_CHOICES,
         default="entry_level",
     )
+    application_type = models.CharField(max_length=50, default="company_site")
+    apply_url = models.URLField(blank=True, default="")
     min_hourly_rate = models.DecimalField(
         max_digits=6,
         decimal_places=2,
@@ -197,17 +205,89 @@ class SalaryReport(models.Model):
 
 class Alumni(models.Model):
     name = models.CharField(max_length=255)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="alumni")
 
     role = models.CharField(max_length=200)
     location = models.CharField(max_length=200)
-
+    headline = models.CharField(max_length=255, blank=True, default="")
     bio = models.TextField()
+    how_they_got_there = models.TextField(blank=True, default="")
+    experience_highlights = models.TextField(blank=True, default="")
+    advice_for_students = models.TextField(blank=True, default="")
+    internship_history = models.TextField(blank=True, default="")
 
     skills = models.CharField(max_length=255)
     is_mentor = models.BooleanField(default=False)
+    open_to_questions = models.BooleanField(default=True)
+    open_to_referrals = models.BooleanField(default=False)
+    email = models.EmailField(blank=True, default="")
+    linkedin_url = models.URLField(blank=True, default="")
 
     graduation_year = models.IntegerField()
 
     def __str__(self):
         return f"{self.name} - {self.company.name}"
+
+
+class SavedJob(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_jobs")
+    job = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "job"], name="unique_saved_job"),
+        ]
+
+
+class SavedCompany(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_companies")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "company"], name="unique_saved_company"),
+        ]
+
+
+class SavedCertification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_certifications")
+    certification = models.ForeignKey(Certification, on_delete=models.CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "certification"], name="unique_saved_certification"),
+        ]
+
+
+class SavedAlumni(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_alumni")
+    alumni = models.ForeignKey(Alumni, on_delete=models.CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "alumni"], name="unique_saved_alumni"),
+        ]
+
+
+class JobApplication(models.Model):
+    STATUS_CHOICES = [
+        ("submitted", "Submitted"),
+        ("reviewing", "Reviewing"),
+        ("closed", "Closed"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="job_applications")
+    job = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name="applications")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="submitted")
+    resume_file = models.FileField(upload_to="applications/resumes/", blank=True, null=True)
+    cover_letter_file = models.FileField(upload_to="applications/cover_letters/", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "job"], name="unique_job_application"),
+        ]

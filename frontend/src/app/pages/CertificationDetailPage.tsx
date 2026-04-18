@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, useOutletContext } from "react-router";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { ArrowLeft, Award, Building2, Briefcase } from "lucide-react";
+import { ArrowLeft, Award, Building2, Briefcase, Bookmark, ExternalLink } from "lucide-react";
+import { SavedItems, User } from "../types/user";
+import { toast } from "sonner";
 
 interface Job {
   id: string;
@@ -21,11 +23,18 @@ interface CertificationDetail {
   name: string;
   description: string;
   organization: string;
+  official_url: string;
   roles: string[];
   job_postings: Job[];
 }
 
 export function CertificationDetailPage() {
+  const { user, savedItems, toggleSavedItem, openAuthModal } = useOutletContext<{
+    user: User | null;
+    savedItems: SavedItems;
+    toggleSavedItem: (itemType: "certification", itemId: number) => Promise<boolean>;
+    openAuthModal: () => void;
+  }>();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [cert, setCert] = useState<CertificationDetail | null>(null);
@@ -55,6 +64,24 @@ export function CertificationDetailPage() {
         setLoading(false);
       });
   }, [id]);
+
+  const handleSaveCertification = async () => {
+    if (!cert) {
+      return;
+    }
+
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+
+    try {
+      const saved = await toggleSavedItem("certification", cert.id);
+      toast.success(saved ? "Certification saved." : "Certification removed from saved items.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update saved certifications");
+    }
+  };
 
   if (loading) {
     return (
@@ -162,7 +189,7 @@ export function CertificationDetailPage() {
                     <div
                       key={job.id}
                       className="p-4 border rounded-lg hover:border-[#2d694f] transition-colors cursor-pointer"
-                      onClick={() => navigate(`/jobs`)}
+                      onClick={() => navigate(`/jobs?job=${job.id}`)}
                     >
                       <h4 className="font-semibold text-gray-900 mb-1">
                         {job.title}
@@ -195,6 +222,17 @@ export function CertificationDetailPage() {
                   {cert.organization}
                 </p>
               </div>
+              {cert.official_url && (
+                <Button
+                  asChild
+                  className="w-full bg-[#2d694f] hover:bg-[#274c37]"
+                >
+                  <a href={cert.official_url} target="_blank" rel="noopener noreferrer">
+                    Official Certification Page
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              )}
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
                   Number of Roles
@@ -212,7 +250,16 @@ export function CertificationDetailPage() {
                 </p>
               </div>
               <Button
-                className="w-full bg-[#2d694f] hover:bg-[#274c37]"
+                variant="outline"
+                className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]"
+                onClick={handleSaveCertification}
+              >
+                <Bookmark className="mr-2 h-4 w-4" />
+                {savedItems.certificationIds.includes(cert.id) ? "Saved Certification" : "Save Certification"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]"
                 onClick={() => navigate("/certifications")}
               >
                 View All Certifications

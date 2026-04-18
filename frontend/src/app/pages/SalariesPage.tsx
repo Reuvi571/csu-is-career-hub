@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Button } from "../components/ui/button";
+import { PageIntro } from "../components/PageIntro";
 import {
   BarChart,
   Bar,
@@ -183,18 +184,11 @@ export function SalariesPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <div className="mb-3 flex items-center gap-3">
-          <div className="bg-[#2d694f] p-3">
-            <DollarSign className="h-7 w-7 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900">Salary Data</h1>
-        </div>
-        <p className="max-w-4xl text-lg text-gray-600">
-          Current salary statistics are calculated from active CSU job postings with structured pay ranges. Historical
-          trend data is stored separately so archived pay benchmarks can be compared year over year.
-        </p>
-      </div>
+      <PageIntro
+        badge="Compensation trends and benchmarks"
+        title="Salary Data"
+        description="Compare current posted pay ranges and review historical salary patterns across internship, co-op, part-time, and entry-level roles."
+      />
 
       <Card className="mb-8 rounded-none border border-[#2d694f] shadow-none">
         <CardHeader>

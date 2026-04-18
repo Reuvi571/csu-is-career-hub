@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { PageIntro } from "../components/PageIntro";
 import {
   Select,
   SelectContent,
@@ -75,14 +76,14 @@ export function CertificationsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
-      {/* Header and Filter */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Professional Certifications
-        </h1>
+    <div className="mx-auto max-w-7xl px-8 py-12">
+      <PageIntro
+        badge="Professional development and role alignment"
+        title="Professional Certifications"
+        description="Review certifications connected to current role tracks and see which credentials show up most often across CSU-relevant opportunities."
+      />
 
-        {/* Role Filter Dropdown */}
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-6">
           <label htmlFor="role-filter" className="text-sm font-medium text-gray-700">
             Filter by Role:

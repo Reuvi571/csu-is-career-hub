@@ -91,102 +91,65 @@ export function HomePage() {
   return (
     <main className="min-h-screen bg-white text-[#5f6368]">
       <section className="bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-0 px-4 py-12 sm:px-6 lg:grid-cols-[290px_minmax(0,1fr)] lg:px-8 lg:py-16">
-          <aside className="border-b border-[#d5d8db] pb-8 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-10">
-            <div className="max-w-[240px]">
-              <p className="mb-6 text-4xl font-bold leading-tight text-[#2d694f]">CSU IS Career Hub</p>
-              <div className="space-y-5 text-[#2d694f]">
-                <div className="border-b border-[#d5d8db] pb-5">
-                  <p className="mb-2 text-2xl font-bold">Internships and jobs</p>
-                  <p className="text-base font-normal text-[#5f6368]">
-                    Browse active roles in software, analytics, systems, and support.
-                  </p>
-                </div>
-                <div className="border-b border-[#d5d8db] pb-5">
-                  <p className="mb-2 text-2xl font-bold">Employer information</p>
-                  <p className="text-base font-normal text-[#5f6368]">
-                    Review company locations, hiring patterns, and student feedback in one place.
-                  </p>
-                </div>
-                <div className="border-b border-[#d5d8db] pb-5">
-                  <p className="mb-2 text-2xl font-bold">Certification pathways</p>
-                  <p className="text-base font-normal text-[#5f6368]">
-                    See which certifications show up across roles, then jump into current jobs asking for them.
-                  </p>
-                </div>
-                <div>
-                  <p className="mb-2 text-2xl font-bold">Compensation data</p>
-                  <p className="text-base font-normal text-[#5f6368]">
-                    Compare current posted pay ranges and archived salary benchmarks before applying or evaluating offers.
-                  </p>
-                </div>
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+          <div className="max-w-5xl border-l border-[#d5d8db] pl-0 sm:pl-8 lg:pl-12">
+            <div className="mb-5 inline-flex items-center gap-2 border border-[#2d694f] bg-white px-4 py-2 text-sm font-semibold text-[#2d694f]">
+              <div className="h-2 w-2 bg-[#7ebc45]" />
+              <span>Career services for CSU Information Systems students</span>
+            </div>
+
+            <h1 className="mb-6 text-5xl font-bold leading-none text-[#2d694f] md:text-6xl">
+              Internship and
+              <br />
+              early-career opportunities
+            </h1>
+
+            <div className="max-w-4xl space-y-5 text-xl leading-relaxed text-[#5f6368]">
+              <p>
+                The CSU IS Career Hub brings together active job postings, employer profiles, student reviews, certification links, and compensation data in one place.
+              </p>
+              <p>
+                Use it to compare roles, understand what employers are looking for, and focus your search on the opportunities that best fit your goals.
+              </p>
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 border border-[#d5d8db] md:grid-cols-3">
+              <div className="border-b border-[#d5d8db] bg-white p-6 md:border-b-0 md:border-r">
+                <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Hiring companies</p>
+                <p className="mt-2 text-4xl font-bold text-[#2d694f]">{companies.length}</p>
+                <p className="mt-2 text-base text-[#5f6368]">Regional employers with active roles and profile details.</p>
+              </div>
+              <div className="border-b border-[#d5d8db] bg-white p-6 md:border-b-0 md:border-r">
+                <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Student reviews</p>
+                <p className="mt-2 text-4xl font-bold text-[#2d694f]">{reviews.length}</p>
+                <p className="mt-2 text-base text-[#5f6368]">Published feedback on interview process, workload, and culture.</p>
+              </div>
+              <div className="bg-white p-6">
+                <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Average hourly pay</p>
+                <p className="mt-2 text-4xl font-bold text-[#2d694f]">${averageHourlyRate}</p>
+                <p className="mt-2 text-base text-[#5f6368]">Calculated from current job postings with structured pay ranges.</p>
               </div>
             </div>
-          </aside>
 
-          <div className="pt-8 lg:pt-0 lg:pl-14">
-            <div className="max-w-4xl">
-              <div className="mb-5 inline-flex items-center gap-2 border border-[#2d694f] bg-white px-4 py-2 text-sm font-semibold text-[#2d694f]">
-                <div className="h-2 w-2 bg-[#7ebc45]" />
-                <span>Career services for CSU Information Systems students</span>
-              </div>
-
-              <h1 className="mb-6 text-5xl font-bold leading-none text-[#2d694f] md:text-6xl">
-                Internship and
-                <br />
-                early-career opportunities
-              </h1>
-
-              <div className="space-y-6 text-xl leading-relaxed text-[#5f6368]">
-                <p>
-                  The Career Hub helps CSU students focus on the employers, roles, and application details that matter most during an internship or first-job search.
-                </p>
-                <p>
-                  Use the job board to review openings, compare posted pay ranges, read student-submitted reviews, and identify certifications employers are actively looking for by role.
-                </p>
-                <p>
-                  The certifications directory connects that research back to open roles, so you can explore a cert and immediately see the kinds of opportunities it supports.
-                </p>
-              </div>
-
-              <div className="mt-10 grid grid-cols-1 border border-[#d5d8db] md:grid-cols-3">
-                <div className="border-b border-[#d5d8db] bg-white p-6 md:border-b-0 md:border-r">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Hiring companies</p>
-                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">{companies.length}</p>
-                  <p className="mt-2 text-base text-[#5f6368]">Regional employers with active roles and profile details.</p>
-                </div>
-                <div className="border-b border-[#d5d8db] bg-white p-6 md:border-b-0 md:border-r">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Student reviews</p>
-                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">{reviews.length}</p>
-                  <p className="mt-2 text-base text-[#5f6368]">Published feedback on interview process, workload, and culture.</p>
-                </div>
-                <div className="bg-white p-6">
-                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Average hourly pay</p>
-                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">${averageHourlyRate}</p>
-                  <p className="mt-2 text-base text-[#5f6368]">Calculated from current job postings with structured pay ranges.</p>
-                </div>
-              </div>
-
-              <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:flex-wrap">
-                <Button asChild size="lg" className="rounded-none bg-[#2d694f] px-8 font-bold text-white hover:bg-[#274c37]">
-                  <Link to="/jobs">
-                    <Briefcase className="mr-2 h-5 w-5" aria-hidden="true" />
-                    View Open Roles
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-none border-[#2d694f] px-8 font-semibold text-[#2d694f] hover:bg-white hover:text-[#274c37]">
-                  <Link to="/companies">
-                    <Building2 className="mr-2 h-5 w-5" aria-hidden="true" />
-                    Employer Directory
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-none border-[#2d694f] px-8 font-semibold text-[#2d694f] hover:bg-white hover:text-[#274c37]">
-                  <Link to="/certifications">
-                    <Award className="mr-2 h-5 w-5" aria-hidden="true" />
-                    Explore Certifications
-                  </Link>
-                </Button>
-              </div>
+            <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:flex-wrap">
+              <Button asChild size="lg" className="rounded-none bg-[#2d694f] px-8 font-bold text-white hover:bg-[#274c37]">
+                <Link to="/jobs">
+                  <Briefcase className="mr-2 h-5 w-5" aria-hidden="true" />
+                  View Open Roles
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-none border-[#2d694f] px-8 font-semibold text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                <Link to="/companies">
+                  <Building2 className="mr-2 h-5 w-5" aria-hidden="true" />
+                  Employer Directory
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-none border-[#2d694f] px-8 font-semibold text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                <Link to="/certifications">
+                  <Award className="mr-2 h-5 w-5" aria-hidden="true" />
+                  Explore Certifications
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

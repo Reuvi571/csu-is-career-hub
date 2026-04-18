@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router";
+import { useTheme } from "next-themes";
 import { User } from "../types/user";
 import { Button } from "./ui/button";
-import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House, Settings, ArrowRightLeft } from "lucide-react";
+import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House, Settings, ArrowRightLeft, Moon, Bookmark, FileText } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Switch } from "./ui/switch";
 
 interface NavigationProps {
   user: User | null;
@@ -14,6 +16,8 @@ interface NavigationProps {
 
 export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: NavigationProps) {
   const location = useLocation();
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -111,7 +115,7 @@ export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: Na
                     </Avatar>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[340px] max-w-none rounded-none border-l-[#d5d8db] p-0">
+                <SheetContent side="right" className="w-[340px] max-w-none rounded-none border-l border-[#d5d8db] bg-background p-0 text-foreground dark:border-[#3b443f]">
                   <SheetHeader className="border-b border-[#d5d8db] bg-[#2d694f] p-6 text-left">
                     <div className="flex items-center gap-4 pr-8">
                       <Avatar className="h-14 w-14">
@@ -132,22 +136,65 @@ export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: Na
                   </SheetHeader>
 
                   <div className="flex flex-1 flex-col gap-3 p-6">
+                    <Link to="/saved-jobs">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        Saved Jobs
+                      </Button>
+                    </Link>
+
+                    <Link to="/applications">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        My Applications
+                      </Button>
+                    </Link>
+
+                    <Link to="/documents">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Documents
+                      </Button>
+                    </Link>
+
                     {user.role === "admin" && (
                       <Link to="/admin">
-                        <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                        <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
                           <Shield className="mr-2 h-4 w-4" />
                           Admin Dashboard
                         </Button>
                       </Link>
                     )}
 
-                    <div className="rounded-none border border-[#d5d8db] bg-white p-4">
-                      <div className="flex items-center gap-3">
-                        <Settings className="h-5 w-5 text-[#2d694f]" />
+                    <div className="rounded-none border border-[#d5d8db] bg-card p-4 dark:border-[#3b443f]">
+                      <div className="mb-4 flex items-center gap-3">
+                        <Settings className="h-5 w-5 text-[#2d694f] dark:text-[#7ebc45]" />
                         <div>
-                          <p className="text-sm font-semibold text-[#2d694f]">Account Settings</p>
-                          <p className="text-xs text-[#5f6368]">Profile editing can be added here next.</p>
+                          <p className="text-sm font-semibold text-[#2d694f] dark:text-[#dce9dc]">Account Settings</p>
+                          <p className="text-xs text-[#5f6368] dark:text-[#aeb8b0]">Update your profile, saved items, and display preferences.</p>
                         </div>
+                      </div>
+
+                      <Link to="/settings">
+                        <Button variant="outline" className="mb-4 w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Open Settings
+                        </Button>
+                      </Link>
+
+                      <div className="flex items-center justify-between gap-4 border-t border-[#d5d8db] pt-4 dark:border-[#3b443f]">
+                        <div className="flex items-start gap-3">
+                          <Moon className="mt-0.5 h-4 w-4 text-[#2d694f] dark:text-[#7ebc45]" />
+                          <div>
+                            <p className="text-sm font-semibold text-[#2d694f] dark:text-[#dce9dc]">Dark Mode</p>
+                            <p className="text-xs text-[#5f6368] dark:text-[#aeb8b0]">Apply a darker CSU-style theme across the site.</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={isDarkMode}
+                          onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                          aria-label="Toggle dark mode"
+                        />
                       </div>
                     </div>
 
@@ -155,7 +202,7 @@ export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: Na
                       <Button
                         variant="outline"
                         onClick={onSwitchAccount}
-                        className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]"
+                        className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white"
                       >
                         <ArrowRightLeft className="mr-2 h-4 w-4" />
                         Switch Account
@@ -165,7 +212,7 @@ export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: Na
                     <Button
                       variant="outline"
                       onClick={onLogout}
-                      className="w-full justify-start rounded-none border-[#274c37] text-[#274c37] hover:bg-white"
+                      className="w-full justify-start rounded-none border-[#274c37] text-[#274c37] hover:bg-background dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out

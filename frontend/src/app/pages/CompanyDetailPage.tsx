@@ -3,14 +3,19 @@ import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Star, MapPin, Users, ExternalLink, Briefcase, DollarSign, ArrowLeft, Award, Building2 } from "lucide-react";
+import { Star, MapPin, Users, ExternalLink, Briefcase, DollarSign, ArrowLeft, Award, Building2, Bookmark } from "lucide-react";
 import { ReviewSubmitModal } from "../components/ReviewSubmitModal";
+import { SavedItems } from "../types/user";
+import { toast } from "sonner";
 
 interface UserContext {
   user: {
     id?: string;
     name?: string;
   } | null;
+  savedItems: SavedItems;
+  toggleSavedItem: (itemType: "company", itemId: number) => Promise<boolean>;
+  openAuthModal: () => void;
 }
 
 interface CompanyReview {
@@ -57,12 +62,22 @@ interface CompanyDetail {
   };
   jobs: CompanyJob[];
   reviews: CompanyReview[];
+  alumni: {
+    id: number;
+    name: string;
+    role: string;
+    graduation_year: number;
+    headline: string;
+    is_mentor: boolean;
+    open_to_questions: boolean;
+    linkedin_url: string;
+  }[];
 }
 
 export function CompanyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useOutletContext<UserContext>();
+  const { user, savedItems, toggleSavedItem, openAuthModal } = useOutletContext<UserContext>();
   const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -119,6 +134,26 @@ export function CompanyDetailPage() {
       internshipRoles: internshipRoles.length ? internshipRoles : company.open_roles,
     };
   }, [company]);
+
+  const alumniPreview = useMemo(() => company?.alumni.slice(0, 3) ?? [], [company]);
+
+  const handleSaveCompany = async () => {
+    if (!company) {
+      return;
+    }
+
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+
+    try {
+      const saved = await toggleSavedItem("company", company.id);
+      toast.success(saved ? "Company saved." : "Company removed from saved items.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update saved companies");
+    }
+  };
 
   if (loading) {
     return (
@@ -184,6 +219,10 @@ export function CompanyDetailPage() {
                 </Button>
               </a>
             )}
+            <Button variant="outline" onClick={handleSaveCompany} className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+              <Bookmark className="mr-2 h-4 w-4" />
+              {savedItems.companyIds.includes(company.id) ? "Saved Company" : "Save Company"}
+            </Button>
             {user && reviewCompany && (
               <Button onClick={() => setReviewModalOpen(true)} className="rounded-none bg-[#2d694f] hover:bg-[#274c37]">
                 Write a Review
@@ -389,6 +428,57 @@ export function CompanyDetailPage() {
                     </Badge>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {company.alumni.length > 0 && (
+            <Card className="rounded-none border border-[#d5d8db] shadow-none">
+              <CardHeader>
+                <CardTitle className="flex items-center text-[#2d694f]">
+                  <Users className="mr-2 h-5 w-5" />
+                  CSU Alumni At This Employer
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {alumniPreview.map((alumni) => (
+                  <div key={alumni.id} className="border border-[#d5d8db] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-[#3d4348]">{alumni.name}</p>
+                        <p className="mt-1 text-sm text-[#5f6368]">{alumni.role}</p>
+                        <p className="mt-1 text-sm text-[#5f6368]">Class of {alumni.graduation_year}</p>
+                        {alumni.headline && <p className="mt-2 text-sm text-[#5f6368]">{alumni.headline}</p>}
+                      </div>
+                      <div className="flex shrink-0 flex-col gap-2">
+                        {alumni.is_mentor && (
+                          <Badge className="rounded-none border border-[#7ebc45] bg-white text-[#2d694f]">
+                            Mentor
+                          </Badge>
+                        )}
+                        {alumni.open_to_questions && (
+                          <Badge className="rounded-none border border-[#7ebc45] bg-white text-[#2d694f]">
+                            Open to questions
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <Link to={`/alumni/${alumni.id}`}>
+                        <Button variant="outline" className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                          View Alumni Profile
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+                {company.alumni.length > 3 && (
+                  <Link to={`/alumni?company=${company.id}`}>
+                    <Button className="w-full rounded-none bg-[#2d694f] hover:bg-[#274c37]">
+                      View More Alumni
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           )}

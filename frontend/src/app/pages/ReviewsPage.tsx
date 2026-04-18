@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { PageIntro } from "../components/PageIntro";
 import { Search, MessageSquare, Star, Building2, ArrowRight } from "lucide-react";
 
 interface Review {
@@ -124,17 +125,11 @@ export function ReviewsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-10">
-        <div className="mb-3 flex items-center gap-3">
-          <div className="rounded-xl bg-[#2d694f] p-3">
-            <MessageSquare className="h-7 w-7 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900">Student Reviews</h1>
-        </div>
-        <p className="max-w-3xl text-lg text-gray-600">
-          Read recent feedback from CSU students about internships, co-ops, and entry-level roles, and compare which employers are rated most highly.
-        </p>
-      </div>
+      <PageIntro
+        badge="Student experience feedback"
+        title="Student Reviews"
+        description="Read recent feedback from CSU students about internships, co-ops, and entry-level roles, and compare which employers are rated most highly."
+      />
 
       {loading ? (
         <div className="flex min-h-[40vh] items-center justify-center">
@@ -264,14 +259,14 @@ export function ReviewsPage() {
                   <div className="space-y-4">
                     {filteredReviews.map((review) => (
                       <Card key={review.id} className="border border-gray-200">
-                        <CardContent className="p-6">
-                          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <CardContent className="p-5 md:p-6">
+                          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
                               <div className="flex flex-wrap items-center gap-3">
-                                <h3 className="text-xl font-bold text-gray-900">{review.company.name}</h3>
+                                <h3 className="text-lg font-bold text-gray-900 md:text-xl">{review.company.name}</h3>
                                 <Badge className="bg-[#2d694f] text-white">{review.role}</Badge>
                               </div>
-                              <p className="mt-2 text-sm text-gray-500">
+                              <p className="mt-1 text-sm text-gray-500">
                                 Posted {new Date(review.date_posted).toLocaleDateString()}
                               </p>
                             </div>
@@ -282,7 +277,7 @@ export function ReviewsPage() {
                             </div>
                           </div>
 
-                          <div className="mt-5 space-y-4">
+                          <div className="mt-4 grid gap-x-8 gap-y-4 md:grid-cols-2">
                             <div>
                               <p className="mb-1 text-sm font-semibold text-[#2d694f]">Pros</p>
                               <p className="text-sm text-gray-600">{review.pros}</p>
@@ -302,7 +297,7 @@ export function ReviewsPage() {
                           </div>
 
                           {review.skills_used.length > 0 && (
-                            <div className="mt-4">
+                            <div className="mt-4 border-t border-gray-100 pt-4">
                               <p className="mb-2 text-sm font-semibold text-[#2d694f]">Skills Used</p>
                               <div className="flex flex-wrap gap-2">
                                 {review.skills_used.map((skill) => (

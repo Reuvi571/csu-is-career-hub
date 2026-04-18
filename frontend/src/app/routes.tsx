@@ -9,6 +9,11 @@ const CompanyDetailPage = lazy(() => import("./pages/CompanyDetailPage").then(m 
 const ReviewsPage = lazy(() => import("./pages/ReviewsPage").then(m => ({ default: m.ReviewsPage })));
 const SalariesPage = lazy(() => import("./pages/SalariesPage").then(m => ({ default: m.SalariesPage })));
 const AlumniPage = lazy(() => import("./pages/AlumniPage").then(m => ({ default: m.AlumniPage })));
+const AlumniDetailPage = lazy(() => import("./pages/AlumniDetailPage").then(m => ({ default: m.AlumniDetailPage })));
+const SettingsPage = lazy(() => import("./pages/SettingsPage").then(m => ({ default: m.SettingsPage })));
+const SavedJobsPage = lazy(() => import("./pages/SavedJobsPage").then(m => ({ default: m.SavedJobsPage })));
+const ApplicationsPage = lazy(() => import("./pages/ApplicationsPage").then(m => ({ default: m.ApplicationsPage })));
+const DocumentsPage = lazy(() => import("./pages/DocumentsPage").then(m => ({ default: m.DocumentsPage })));
 const AdminPage = lazy(() => import("./pages/AdminPage").then(m => ({ default: m.AdminPage })));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
 const JobsPage = lazy(() => import("./pages/JobsPage").then(m => ({ default: m.JobsPage })));
@@ -38,6 +43,11 @@ export const router = createBrowserRouter([
       { path: "reviews", element: <SuspenseWrapper><ReviewsPage /></SuspenseWrapper> },
       { path: "salaries", element: <SuspenseWrapper><SalariesPage /></SuspenseWrapper> },
       { path: "alumni", element: <SuspenseWrapper><AlumniPage /></SuspenseWrapper> },
+      { path: "alumni/:id", element: <SuspenseWrapper><AlumniDetailPage /></SuspenseWrapper> },
+      { path: "settings", element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper> },
+      { path: "saved-jobs", element: <SuspenseWrapper><SavedJobsPage /></SuspenseWrapper> },
+      { path: "applications", element: <SuspenseWrapper><ApplicationsPage /></SuspenseWrapper> },
+      { path: "documents", element: <SuspenseWrapper><DocumentsPage /></SuspenseWrapper> },
       { path: "admin", element: <SuspenseWrapper><AdminPage /></SuspenseWrapper> },
       { path: "jobs", element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
       { path: "certifications", element: <SuspenseWrapper><CertificationsPage /></SuspenseWrapper> },

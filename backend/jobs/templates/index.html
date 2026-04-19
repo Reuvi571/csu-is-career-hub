@@ -22,17 +22,17 @@
                 </div>
                 <p class="text-slate-600 font-medium">{{ job.company }} &bull; {{ job.location }}</p>
                 <p class="text-slate-500 text-sm mt-2 mb-4">{{ job.description }}</p>
-                
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Required:</span>
-                    <button hx-get="/api/mdn/{{ job.skills_required }}/" 
-                            hx-target="#mdn-{{ job.id }}" 
-                            aria-label="View official MDN definition for {{ job.skills_required }}"
-                            class="px-3 py-1 bg-slate-100 hover:bg-slate-200 transition-colors rounded-full text-xs font-bold border border-slate-300">
-                        {{ job.skills_required }}
-                    </button>
+
+                {% if job.certifications.all %}
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Certifications:</span>
+                    {% for cert in job.certifications.all %}
+                    <span class="px-3 py-1 bg-slate-100 rounded-full text-xs font-bold border border-slate-300">
+                        {{ cert.name }}
+                    </span>
+                    {% endfor %}
                 </div>
-                <div id="mdn-{{ job.id }}"></div>
+                {% endif %}
             </div>
             {% empty %}
             <div class="text-center p-12 border-2 border-dashed border-slate-300 rounded-xl">

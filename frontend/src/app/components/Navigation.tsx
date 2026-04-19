@@ -1,25 +1,23 @@
 import { Link, useLocation } from "react-router";
-import { User } from "../data/mockData";
+import { useTheme } from "next-themes";
+import { User } from "../types/user";
 import { Button } from "./ui/button";
-import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House, Settings, ArrowRightLeft, Moon, Bookmark, FileText } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Switch } from "./ui/switch";
 
 interface NavigationProps {
   user: User | null;
   onLoginClick: () => void;
   onLogout: () => void;
+  onSwitchAccount: () => void;
 }
 
-export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
+export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: NavigationProps) {
   const location = useLocation();
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -47,7 +45,7 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
   };
 
   return (
-    <nav className="bg-teal-700 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 bg-[#2d694f]">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section - Left */}
@@ -55,9 +53,9 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
             <div className="flex flex-col justify-start leading-tight">
               <div className="text-sm font-bold text-white tracking-tight">
                 <span>CSU</span>
-                <span className="text-lime-400 font-black ml-1">IS</span>
+                <span className="ml-1 font-black text-[#7ebc45]">IS</span>
               </div>
-              <div className="text-xs text-teal-100 font-semibold">Careers</div>
+              <div className="text-xs font-semibold text-white/85">Careers</div>
             </div>
           </Link>
 
@@ -71,8 +69,8 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                   to={item.path}
                   className={`flex items-center space-x-1 text-sm font-semibold transition-colors ${
                     isActive(item.path)
-                      ? "text-lime-300"
-                      : "text-white hover:text-lime-300"
+                      ? "text-[#7ebc45]"
+                      : "text-white hover:text-[#7ebc45]"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -94,8 +92,8 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
                     to={item.path}
                     className={`flex items-center space-x-1 text-sm font-semibold transition-colors ${
                       isActive(item.path)
-                        ? "text-lime-300"
-                        : "text-white hover:text-lime-300"
+                        ? "text-[#7ebc45]"
+                        : "text-white hover:text-[#7ebc45]"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -107,48 +105,125 @@ export function Navigation({ user, onLoginClick, onLogout }: NavigationProps) {
 
             {/* User Section */}
             {user ? (
-              <div className="flex items-center space-x-4">
-                {user.role === "admin" && (
-                  <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="text-white hover:text-lime-300 hover:bg-teal-600">
-                      <Shield className="h-4 w-4 mr-1" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-none hover:bg-teal-600">
-                      <Avatar>
-                        <AvatarFallback className="bg-lime-400 text-teal-700 font-semibold">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" className="relative h-12 w-12 rounded-none p-0 hover:bg-[#274c37]">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-[#7ebc45] font-semibold text-[#2d694f]">
+                        {getInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[340px] max-w-none rounded-none border-l border-[#d5d8db] bg-background p-0 text-foreground dark:border-[#3b443f]">
+                  <SheetHeader className="border-b border-[#d5d8db] bg-[#2d694f] p-6 text-left">
+                    <div className="flex items-center gap-4 pr-8">
+                      <Avatar className="h-14 w-14">
+                        <AvatarFallback className="bg-[#7ebc45] text-lg font-semibold text-[#2d694f]">
                           {getInitials(user.name)}
                         </AvatarFallback>
                       </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-600">{user.email}</p>
-                        <p className="text-xs text-gray-600 capitalize">
+                      <div className="min-w-0">
+                        <SheetTitle className="truncate text-white">{user.name}</SheetTitle>
+                        <SheetDescription className="mt-1 text-white/80">
+                          {user.email}
+                          <br />
                           {user.role}
                           {user.graduationYear && ` • Class of ${user.graduationYear}`}
-                        </p>
+                        </SheetDescription>
                       </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onLogout}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                    </div>
+                  </SheetHeader>
+
+                  <div className="flex flex-1 flex-col gap-3 p-6">
+                    <Link to="/saved-jobs">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        Saved Jobs
+                      </Button>
+                    </Link>
+
+                    <Link to="/applications">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        My Applications
+                      </Button>
+                    </Link>
+
+                    <Link to="/documents">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Documents
+                      </Button>
+                    </Link>
+
+                    {user.role === "admin" && (
+                      <Link to="/admin">
+                        <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin Dashboard
+                        </Button>
+                      </Link>
+                    )}
+
+                    <div className="rounded-none border border-[#d5d8db] bg-card p-4 dark:border-[#3b443f]">
+                      <div className="mb-4 flex items-center gap-3">
+                        <Settings className="h-5 w-5 text-[#2d694f] dark:text-[#7ebc45]" />
+                        <div>
+                          <p className="text-sm font-semibold text-[#2d694f] dark:text-[#dce9dc]">Account Settings</p>
+                          <p className="text-xs text-[#5f6368] dark:text-[#aeb8b0]">Update your profile, saved items, and display preferences.</p>
+                        </div>
+                      </div>
+
+                      <Link to="/settings">
+                        <Button variant="outline" className="mb-4 w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Open Settings
+                        </Button>
+                      </Link>
+
+                      <div className="flex items-center justify-between gap-4 border-t border-[#d5d8db] pt-4 dark:border-[#3b443f]">
+                        <div className="flex items-start gap-3">
+                          <Moon className="mt-0.5 h-4 w-4 text-[#2d694f] dark:text-[#7ebc45]" />
+                          <div>
+                            <p className="text-sm font-semibold text-[#2d694f] dark:text-[#dce9dc]">Dark Mode</p>
+                            <p className="text-xs text-[#5f6368] dark:text-[#aeb8b0]">Apply a darker CSU-style theme across the site.</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={isDarkMode}
+                          onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                          aria-label="Toggle dark mode"
+                        />
+                      </div>
+                    </div>
+
+                    {user.role === "admin" && (
+                      <Button
+                        variant="outline"
+                        onClick={onSwitchAccount}
+                        className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white"
+                      >
+                        <ArrowRightLeft className="mr-2 h-4 w-4" />
+                        Switch Account
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      onClick={onLogout}
+                      className="w-full justify-start rounded-none border-[#274c37] text-[#274c37] hover:bg-background dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
             ) : (
               <Button 
                 onClick={onLoginClick} 
-                className="bg-lime-400 hover:bg-lime-500 text-teal-700 font-semibold px-4 py-2 h-10"
+                className="h-10 bg-[#7ebc45] px-4 py-2 font-semibold text-[#2d694f] hover:bg-[#274c37] hover:text-white"
               >
                 Sign In
               </Button>

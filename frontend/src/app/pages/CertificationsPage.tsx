@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { PageIntro } from "../components/PageIntro";
 import {
   Select,
   SelectContent,
@@ -69,20 +70,20 @@ export function CertificationsPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto p-8 flex justify-center items-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-800"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d694f]"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
-      {/* Header and Filter */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Professional Certifications
-        </h1>
+    <div className="mx-auto max-w-7xl px-8 py-12">
+      <PageIntro
+        badge="Professional development and role alignment"
+        title="Professional Certifications"
+        description="Review certifications connected to current role tracks and see which credentials show up most often across CSU-relevant opportunities."
+      />
 
-        {/* Role Filter Dropdown */}
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-6">
           <label htmlFor="role-filter" className="text-sm font-medium text-gray-700">
             Filter by Role:
@@ -115,19 +116,19 @@ export function CertificationsPage() {
           {filteredCertifications.map((cert) => (
             <div
               key={cert.id}
-              className="border rounded-lg p-6 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer bg-white"
+              className="border rounded-lg p-6 hover:shadow-lg hover:border-[#2d694f] transition-all cursor-pointer bg-white"
               onClick={() => navigate(`/certifications/${cert.id}`)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-blue-600 mb-1">
+                  <h3 className="text-lg font-semibold text-[#2d694f] mb-1">
                     {cert.name}
                   </h3>
                   <p className="text-sm text-gray-600 font-medium">
                     {cert.organization}
                   </p>
                 </div>
-                <Award className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                <Award className="h-5 w-5 text-[#7ebc45] flex-shrink-0" />
               </div>
 
               <p className="text-gray-700 text-sm mb-4 line-clamp-2">

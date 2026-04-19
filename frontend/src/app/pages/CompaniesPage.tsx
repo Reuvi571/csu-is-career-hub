@@ -4,6 +4,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { PageIntro } from "../components/PageIntro";
 import { Building2, MapPin, Search, Star, Briefcase, ArrowRight, Filter, X } from "lucide-react";
 
 interface Company {
@@ -102,64 +103,39 @@ export function CompaniesPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <section className="relative overflow-hidden bg-teal-700 text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-700 via-teal-800 to-teal-900 opacity-95" />
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "linear-gradient(0deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent)",
-            backgroundSize: "50px 50px",
-          }}
-        />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-18 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <div className="mb-6 inline-flex items-center space-x-2 border border-white/20 bg-white/10 px-4 py-2">
-              <div className="block h-2 w-2 bg-lime-400" />
-              <span className="text-sm font-semibold">Companies With Active Openings</span>
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <PageIntro
+          badge="Companies with active openings"
+          title="Explore the companies actively hiring CSU students"
+          description="Browse employer profiles, compare current openings, and move directly into the roles that are available now."
+        >
+          <div className="flex flex-wrap items-center gap-6 text-sm text-[#5f6368]">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-[#2d694f]" aria-hidden="true" />
+              <span>{companies.length} hiring companies</span>
             </div>
-
-            <h1 className="text-4xl font-bold leading-tight md:text-6xl">
-              Explore the companies
-              <br />
-              <span className="text-lime-400">actively hiring CSU students</span>
-            </h1>
-
-            <p className="mt-5 max-w-2xl text-lg text-teal-50">
-              Browse employer profiles backed by the backend seed data and jump straight into the roles that are open now.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-teal-100">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-lime-400" aria-hidden="true" />
-                <span>{companies.length} hiring companies</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-lime-400" aria-hidden="true" />
-                <span>{companies.reduce((sum, company) => sum + company.job_count, 0)} live openings</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-[#2d694f]" aria-hidden="true" />
+              <span>{companies.reduce((sum, company) => sum + company.job_count, 0)} live openings</span>
             </div>
           </div>
-        </div>
-      </section>
+        </PageIntro>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-none border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-200 bg-white px-6 py-5">
             <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
-                <div className="mb-2 inline-flex items-center gap-2 bg-teal-100 px-3 py-1 text-sm font-semibold text-teal-700">
+                <div className="mb-2 inline-flex items-center gap-2 border border-[#7ebc45] bg-white px-3 py-1 text-sm font-semibold text-[#2d694f]">
                   <Filter className="h-4 w-4" aria-hidden="true" />
                   Company Directory
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900">Browse by company, location, or role</h2>
                 <p className="mt-2 text-sm text-gray-600">
-                  The list below is pulled from the backend and only includes companies with active seeded job postings.
+                  Review employers with active openings and compare locations, ratings, and hiring focus in one place.
                 </p>
               </div>
               <Link to="/jobs" className="shrink-0">
-                <Button className="bg-teal-700 font-semibold text-white hover:bg-teal-800">
+                <Button className="bg-[#2d694f] font-semibold text-white hover:bg-[#274c37]">
                   View All Jobs
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -167,98 +143,98 @@ export function CompaniesPage() {
             </div>
           </div>
 
-          <div className="grid min-h-[780px] grid-cols-1 xl:grid-cols-[280px_minmax(320px,420px)_minmax(0,1fr)]">
-            <aside className="border-b border-gray-200 bg-gray-50 p-6 xl:border-b-0 xl:border-r">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900">Filters</h3>
-                  {hasActiveFilters && (
-                    <button
-                      type="button"
-                      onClick={clearFilters}
-                      className="text-sm font-medium text-teal-700 hover:text-teal-800"
-                    >
-                      Clear
-                    </button>
-                  )}
+          <div className="border-b border-gray-200 bg-gray-50 px-6 py-5">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_220px_220px_auto]">
+              <div>
+                <label className="mb-3 block text-sm font-semibold text-gray-900">Search</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Company, role, or title"
+                    className="h-11 rounded-none border-gray-300 bg-white pl-10"
+                  />
                 </div>
+              </div>
 
-                <div>
-                  <label className="mb-3 block text-sm font-semibold text-gray-900">Search</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-                    <Input
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Company, role, or title"
-                      className="border-gray-300 bg-white pl-10"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label className="mb-3 block text-sm font-semibold text-gray-900">Location</label>
+                <select
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  className="h-11 w-full rounded-none border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#2d694f] focus:outline-none focus:ring-2 focus:ring-[#2d694f]/20"
+                >
+                  <option value="">All locations</option>
+                  {locations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                <div>
-                  <label className="mb-3 block text-sm font-semibold text-gray-900">Location</label>
-                  <select
-                    value={locationFilter}
-                    onChange={(e) => setLocationFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                  >
-                    <option value="">All locations</option>
-                    {locations.map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="mb-3 block text-sm font-semibold text-gray-900">Role focus</label>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="h-11 w-full rounded-none border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#2d694f] focus:outline-none focus:ring-2 focus:ring-[#2d694f]/20"
+                >
+                  <option value="">All roles</option>
+                  {roles.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                <div>
-                  <label className="mb-3 block text-sm font-semibold text-gray-900">Role focus</label>
-                  <select
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                  >
-                    <option value="">All roles</option>
-                    {roles.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
+              <div className="flex items-end">
                 {hasActiveFilters && (
-                  <div className="space-y-2 border-t border-gray-200 pt-4">
-                    {searchQuery && (
-                      <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm text-gray-700">
-                        <span>{searchQuery}</span>
-                        <button type="button" onClick={() => setSearchQuery("")}>
-                          <X className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </button>
-                      </div>
-                    )}
-                    {locationFilter && (
-                      <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm text-gray-700">
-                        <span>{locationFilter}</span>
-                        <button type="button" onClick={() => setLocationFilter("")}>
-                          <X className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </button>
-                      </div>
-                    )}
-                    {roleFilter && (
-                      <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm text-gray-700">
-                        <span>{roleFilter}</span>
-                        <button type="button" onClick={() => setRoleFilter("")}>
-                          <X className="h-4 w-4 text-gray-400" aria-hidden="true" />
-                        </button>
-                      </div>
-                    )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="h-11 w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37] lg:w-auto"
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {hasActiveFilters && (
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-200 pt-4">
+                {searchQuery && (
+                  <div className="flex items-center gap-2 border border-[#d5d8db] bg-white px-3 py-2 text-sm text-gray-700">
+                    <span>{searchQuery}</span>
+                    <button type="button" onClick={() => setSearchQuery("")}>
+                      <X className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+                {locationFilter && (
+                  <div className="flex items-center gap-2 border border-[#d5d8db] bg-white px-3 py-2 text-sm text-gray-700">
+                    <span>{locationFilter}</span>
+                    <button type="button" onClick={() => setLocationFilter("")}>
+                      <X className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+                {roleFilter && (
+                  <div className="flex items-center gap-2 border border-[#d5d8db] bg-white px-3 py-2 text-sm text-gray-700">
+                    <span>{roleFilter}</span>
+                    <button type="button" onClick={() => setRoleFilter("")}>
+                      <X className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                    </button>
                   </div>
                 )}
               </div>
-            </aside>
+            )}
+          </div>
 
+          <div className="grid min-h-[760px] grid-cols-1 xl:grid-cols-[minmax(420px,520px)_minmax(0,1fr)]">
             <section className="border-b border-gray-200 bg-white xl:border-b-0 xl:border-r">
               <div className="border-b border-gray-200 px-6 py-4">
                 <h3 className="text-lg font-bold text-gray-900">Hiring Companies</h3>
@@ -267,11 +243,11 @@ export function CompaniesPage() {
                 </p>
               </div>
 
-              <div className="max-h-[780px] overflow-y-auto">
+              <div className="max-h-[760px] overflow-y-auto">
                 {loading ? (
                   <div className="space-y-4 p-6">
                     {[0, 1, 2].map((item) => (
-                      <Card key={item} className="border border-gray-200">
+                      <Card key={item} className="rounded-none border border-gray-200">
                         <CardContent className="p-5">
                           <div className="animate-pulse space-y-3">
                             <div className="h-4 w-2/3 rounded bg-gray-200" />
@@ -296,15 +272,15 @@ export function CompaniesPage() {
                           key={company.id}
                           type="button"
                           onClick={() => setSelectedCompanyId(company.id)}
-                          className={`w-full border-l-4 px-6 py-5 text-left transition ${
+                          className={`w-full border-l-4 px-7 py-6 text-left transition ${
                             isSelected
-                              ? "border-l-teal-700 bg-teal-50"
+                              ? "border-l-[#2d694f] bg-white"
                               : "border-l-transparent hover:bg-gray-50"
                           }`}
                         >
                           <div className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-teal-100">
-                              <Building2 className="h-6 w-6 text-teal-700" aria-hidden="true" />
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-[#2d694f] bg-white">
+                              <Building2 className="h-6 w-6 text-[#2d694f]" aria-hidden="true" />
                             </div>
 
                             <div className="min-w-0 flex-1">
@@ -316,7 +292,7 @@ export function CompaniesPage() {
                                     <span>{company.location}</span>
                                   </p>
                                 </div>
-                                <Badge className="bg-lime-100 text-lime-700 hover:bg-lime-100">
+                                <Badge className="border border-[#7ebc45] bg-white text-[#2d694f] hover:bg-white">
                                   {company.job_count} openings
                                 </Badge>
                               </div>
@@ -347,11 +323,11 @@ export function CompaniesPage() {
               <div className="h-full p-6 md:p-8">
                 {selectedCompany ? (
                   <div className="space-y-8">
-                    <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+                    <div className="bg-white p-8 shadow-sm ring-1 ring-gray-200">
                       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                         <div className="flex items-start gap-4">
-                          <div className="flex h-16 w-16 shrink-0 items-center justify-center bg-teal-100">
-                            <Building2 className="h-8 w-8 text-teal-700" aria-hidden="true" />
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-[#2d694f] bg-white">
+                            <Building2 className="h-8 w-8 text-[#2d694f]" aria-hidden="true" />
                           </div>
                           <div>
                             <h3 className="text-3xl font-bold text-gray-900">{selectedCompany.name}</h3>
@@ -360,11 +336,11 @@ export function CompaniesPage() {
                                 <MapPin className="mr-1 h-3 w-3" aria-hidden="true" />
                                 {selectedCompany.location}
                               </Badge>
-                              <Badge variant="secondary" className="bg-lime-100 text-lime-700">
+                              <Badge variant="secondary" className="border border-[#7ebc45] bg-white text-[#2d694f]">
                                 <Briefcase className="mr-1 h-3 w-3" aria-hidden="true" />
                                 {selectedCompany.job_count} active roles
                               </Badge>
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-700">
+                              <Badge variant="secondary" className="border border-[#7ebc45] bg-[#edf7e4] text-[#2d694f]">
                                 <Star className="mr-1 h-3 w-3" aria-hidden="true" />
                                 {selectedCompany.review_count > 0
                                   ? `${selectedCompany.avg_rating}/5 from ${selectedCompany.review_count} reviews`
@@ -375,7 +351,7 @@ export function CompaniesPage() {
                         </div>
 
                         <Link to="/jobs" className="shrink-0">
-                          <Button className="bg-teal-700 font-semibold text-white hover:bg-teal-800">
+                          <Button className="bg-[#2d694f] font-semibold text-white hover:bg-[#274c37]">
                             Explore Jobs
                             <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                           </Button>
@@ -384,68 +360,68 @@ export function CompaniesPage() {
                     </div>
 
                     <div className="grid gap-6 md:grid-cols-3">
-                      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                      <div className="border border-gray-200 bg-white p-6">
                         <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Open Positions</p>
                         <p className="mt-3 text-4xl font-bold text-gray-900">{selectedCompany.job_count}</p>
-                        <p className="mt-2 text-sm text-gray-600">Seeded backend roles currently visible in the jobs feed.</p>
+                        <p className="mt-2 text-sm text-gray-600">Roles currently listed for this employer.</p>
                       </div>
-                      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                      <div className="border border-gray-200 bg-white p-6">
                         <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Student Rating</p>
                         <p className="mt-3 text-4xl font-bold text-gray-900">
                           {selectedCompany.review_count > 0 ? selectedCompany.avg_rating.toFixed(1) : "--"}
                         </p>
                         <p className="mt-2 text-sm text-gray-600">
                           {selectedCompany.review_count > 0
-                            ? `Based on ${selectedCompany.review_count} submitted reviews.`
-                            : "This company has openings, but no reviews yet."}
+                            ? `Based on ${selectedCompany.review_count} student reviews.`
+                            : "No published reviews yet."}
                         </p>
                       </div>
-                      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                      <div className="border border-gray-200 bg-white p-6">
                         <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">Role Coverage</p>
                         <p className="mt-3 text-4xl font-bold text-gray-900">{selectedCompany.open_roles.length}</p>
-                        <p className="mt-2 text-sm text-gray-600">Distinct role tracks represented across current postings.</p>
+                        <p className="mt-2 text-sm text-gray-600">Different role areas hiring now.</p>
                       </div>
                     </div>
 
                     <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
-                      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                      <div className="border border-gray-200 bg-white p-6">
                         <div className="mb-5">
                           <h4 className="text-xl font-bold text-gray-900">Active job titles</h4>
-                          <p className="mt-1 text-sm text-gray-600">Titles pulled directly from the backend job seed data.</p>
+                          <p className="mt-1 text-sm text-gray-600">Current openings at this company.</p>
                         </div>
                         <div className="space-y-3">
                           {selectedCompany.job_titles.map((title) => (
                             <div
                               key={title}
-                              className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                              className="grid grid-cols-[48px_minmax(0,1fr)] gap-4 border border-gray-200 bg-gray-50 px-4 py-4 md:grid-cols-[48px_minmax(0,1fr)_112px]"
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center bg-teal-100">
-                                  <Briefcase className="h-5 w-5 text-teal-700" aria-hidden="true" />
-                                </div>
-                                <div>
-                                  <p className="font-semibold text-gray-900">{title}</p>
-                                  <p className="text-sm text-gray-600">{selectedCompany.name}</p>
-                                </div>
+                              <div className="flex h-10 w-10 items-center justify-center border border-[#2d694f] bg-white">
+                                <Briefcase className="h-5 w-5 text-[#2d694f]" aria-hidden="true" />
                               </div>
-                              <Link to="/jobs">
-                                <Button variant="outline" className="border-teal-300 text-teal-700 hover:bg-teal-50">
-                                  View
-                                </Button>
-                              </Link>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-gray-900">{title}</p>
+                                <p className="text-sm text-gray-600">{selectedCompany.name}</p>
+                              </div>
+                              <div className="md:justify-self-end">
+                                <Link to="/jobs">
+                                  <Button variant="outline" className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37] md:w-auto">
+                                    View
+                                  </Button>
+                                </Link>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                      <div className="border border-gray-200 bg-white p-6">
                         <div className="mb-5">
                           <h4 className="text-xl font-bold text-gray-900">Hiring focus</h4>
                           <p className="mt-1 text-sm text-gray-600">Role areas currently represented for this company.</p>
                         </div>
                         <div className="flex flex-wrap gap-3">
                           {selectedCompany.open_roles.map((role) => (
-                            <Badge key={role} className="bg-teal-100 px-3 py-2 text-sm font-medium text-teal-700 hover:bg-teal-100">
+                            <Badge key={role} className="border border-[#2d694f] bg-white px-3 py-2 text-sm font-medium text-[#2d694f] hover:bg-white">
                               {role}
                             </Badge>
                           ))}
@@ -454,7 +430,7 @@ export function CompaniesPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex h-full min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center">
+                  <div className="flex h-full min-h-[360px] items-center justify-center border border-dashed border-gray-300 bg-white p-8 text-center">
                     <div>
                       <Building2 className="mx-auto h-10 w-10 text-gray-300" aria-hidden="true" />
                       <h3 className="mt-4 text-lg font-semibold text-gray-900">No company selected</h3>

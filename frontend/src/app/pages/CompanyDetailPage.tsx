@@ -1,92 +1,230 @@
-import { useParams, Link, useOutletContext, useNavigate } from "react-router";
-import { mockCompanies, mockReviews, mockSalaryData, User } from "../data/mockData";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Separator } from "../components/ui/separator";
-import { Progress } from "../components/ui/progress";
-import { Star, MapPin, Users, ExternalLink, Briefcase, DollarSign, TrendingUp, ArrowLeft, Award, CheckCircle2, Circle } from "lucide-react";
-import { useState } from "react";
+import { Star, MapPin, Users, ExternalLink, Briefcase, DollarSign, ArrowLeft, Award, Building2, Bookmark } from "lucide-react";
 import { ReviewSubmitModal } from "../components/ReviewSubmitModal";
+import { SavedItems } from "../types/user";
+import { toast } from "sonner";
+
+interface UserContext {
+  user: {
+    id?: string;
+    name?: string;
+  } | null;
+  savedItems: SavedItems;
+  toggleSavedItem: (itemType: "company", itemId: number) => Promise<boolean>;
+  openAuthModal: () => void;
+}
+
+interface CompanyReview {
+  id: number;
+  role: string;
+  rating: number;
+  pros: string;
+  cons: string;
+  interview_process: string;
+  recommendation: string;
+  skills_used: string[];
+  date_posted: string;
+}
+
+interface CompanyJob {
+  id: string;
+  title: string;
+  location: string;
+  experience_level: string;
+  position_type: string;
+  salary_range: string;
+  date_posted: string;
+  roles: string[];
+  certifications: string[];
+}
+
+interface CompanyDetail {
+  id: number;
+  name: string;
+  location: string;
+  industry: string;
+  size: string;
+  website: string;
+  description: string;
+  avg_rating: number;
+  review_count: number;
+  job_count: number;
+  open_roles: string[];
+  certifications: string[];
+  salary_summary: {
+    avg_midpoint: number;
+    min_rate: number;
+    max_rate: number;
+  };
+  jobs: CompanyJob[];
+  reviews: CompanyReview[];
+  alumni: {
+    id: number;
+    name: string;
+    role: string;
+    graduation_year: number;
+    headline: string;
+    is_mentor: boolean;
+    open_to_questions: boolean;
+    linkedin_url: string;
+  }[];
+}
 
 export function CompanyDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useOutletContext<{ user: User | null }>();
   const navigate = useNavigate();
+  const { user, savedItems, toggleSavedItem, openAuthModal } = useOutletContext<UserContext>();
+  const [company, setCompany] = useState<CompanyDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
-  const company = mockCompanies.find((c) => c.id === id);
-  const companyReviews = mockReviews.filter((r) => r.companyId === id && r.isApproved);
-  const companySalaries = mockSalaryData.filter((s) => s.companyId === id && s.isVerified);
+  useEffect(() => {
+    if (!id) {
+      setError("Company not found");
+      setLoading(false);
+      return;
+    }
 
-  if (!company) {
+    setLoading(true);
+    setError("");
+
+    fetch(`http://127.0.0.1:8000/api/companies/${id}/`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to load company");
+        }
+        return res.json();
+      })
+      .then((data: CompanyDetail) => {
+        setCompany(data);
+      })
+      .catch((err: Error) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [id]);
+
+  const ratingDistribution = useMemo(() => {
+    if (!company) {
+      return [];
+    }
+
+    return [5, 4, 3, 2, 1].map((rating) => ({
+      rating,
+      count: company.reviews.filter((review) => Math.round(review.rating) === rating).length,
+    }));
+  }, [company]);
+
+  const reviewCompany = useMemo(() => {
+    if (!company) {
+      return null;
+    }
+
+    const internshipRoles = company.jobs.map((job) => job.title);
+    return {
+      id: company.id,
+      name: company.name,
+      internshipRoles: internshipRoles.length ? internshipRoles : company.open_roles,
+    };
+  }, [company]);
+
+  const alumniPreview = useMemo(() => company?.alumni.slice(0, 3) ?? [], [company]);
+
+  const handleSaveCompany = async () => {
+    if (!company) {
+      return;
+    }
+
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+
+    try {
+      const saved = await toggleSavedItem("company", company.id);
+      toast.success(saved ? "Company saved." : "Company removed from saved items.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update saved companies");
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <p className="text-muted-foreground">Company not found</p>
+      <div className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-[#2d694f]" />
+      </div>
+    );
+  }
+
+  if (error || !company) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <p className="text-[#5f6368]">{error || "Company not found"}</p>
         <Link to="/companies">
-          <Button className="mt-4">Back to Companies</Button>
+          <Button className="mt-4 rounded-none bg-[#2d694f] hover:bg-[#274c37]">Back to Companies</Button>
         </Link>
       </div>
     );
   }
 
-  // Calculate rating distribution
-  const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => ({
-    rating,
-    count: companyReviews.filter((r) => r.rating === rating).length,
-    percentage:
-      companyReviews.length > 0
-        ? (companyReviews.filter((r) => r.rating === rating).length / companyReviews.length) * 100
-        : 0,
-  }));
-
-  // Calculate average salary
-  const avgSalary =
-    companySalaries.length > 0
-      ? companySalaries.reduce((sum, s) => sum + s.hourlyRate, 0) / companySalaries.length
-      : 0;
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
-        <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <Button
+        variant="ghost"
+        onClick={() => navigate(-1)}
+        className="mb-6 rounded-none px-0 text-[#2d694f] hover:bg-white hover:text-[#274c37]"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
 
-      {/* Company Header */}
-      <div className="bg-white rounded-lg shadow-sm border p-8 mb-8">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-          <div className="flex items-start space-x-4">
-            <div className="text-6xl">{company.logo}</div>
+      <div className="mb-8 border border-[#d5d8db] bg-white p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-16 w-16 items-center justify-center border border-[#2d694f] bg-white">
+              <Building2 className="h-8 w-8 text-[#2d694f]" />
+            </div>
             <div>
-              <h1 className="text-3xl mb-2">{company.name}</h1>
-              <div className="flex flex-wrap gap-3 mb-3">
-                <Badge variant="secondary" className="flex items-center">
-                  <MapPin className="h-3 w-3 mr-1" />
+              <h1 className="text-3xl font-bold text-[#2d694f]">{company.name}</h1>
+              <div className="mt-3 flex flex-wrap gap-3 text-sm text-[#5f6368]">
+                <span className="inline-flex items-center gap-2 border border-[#d5d8db] px-3 py-2">
+                  <MapPin className="h-4 w-4 text-[#2d694f]" />
                   {company.location}
-                </Badge>
-                <Badge variant="secondary" className="flex items-center">
-                  <Users className="h-3 w-3 mr-1" />
-                  {company.size}
-                </Badge>
-                <Badge variant="secondary">{company.industry}</Badge>
+                </span>
+                {company.size && (
+                  <span className="inline-flex items-center gap-2 border border-[#d5d8db] px-3 py-2">
+                    <Users className="h-4 w-4 text-[#2d694f]" />
+                    {company.size}
+                  </span>
+                )}
+                {company.industry && <span className="border border-[#d5d8db] px-3 py-2">{company.industry}</span>}
               </div>
-              <p className="text-muted-foreground">{company.description}</p>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-[#5f6368]">{company.description}</p>
             </div>
           </div>
-          <div className="flex flex-col space-y-3">
-            <a
-              href={`https://${company.website}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline" className="w-full">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Visit Website
-              </Button>
-            </a>
-            {user && (
-              <Button onClick={() => setReviewModalOpen(true)}>
+
+          <div className="flex flex-col gap-3">
+            {company.website && (
+              <a href={`https://${company.website}`} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Visit Website
+                </Button>
+              </a>
+            )}
+            <Button variant="outline" onClick={handleSaveCompany} className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+              <Bookmark className="mr-2 h-4 w-4" />
+              {savedItems.companyIds.includes(company.id) ? "Saved Company" : "Save Company"}
+            </Button>
+            {user && reviewCompany && (
+              <Button onClick={() => setReviewModalOpen(true)} className="rounded-none bg-[#2d694f] hover:bg-[#274c37]">
                 Write a Review
               </Button>
             )}
@@ -94,45 +232,68 @@ export function CompanyDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Ratings Overview */}
-          <Card>
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
+        <Card className="rounded-none border border-[#d5d8db] shadow-none">
+          <CardContent className="pt-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Average Rating</p>
+            <p className="mt-2 text-4xl font-bold text-[#2d694f]">{company.avg_rating.toFixed(1)}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-none border border-[#d5d8db] shadow-none">
+          <CardContent className="pt-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Published Reviews</p>
+            <p className="mt-2 text-4xl font-bold text-[#2d694f]">{company.review_count}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-none border border-[#d5d8db] shadow-none">
+          <CardContent className="pt-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Open Roles</p>
+            <p className="mt-2 text-4xl font-bold text-[#2d694f]">{company.job_count}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-none border border-[#d5d8db] shadow-none">
+          <CardContent className="pt-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Average Pay Midpoint</p>
+            <p className="mt-2 text-4xl font-bold text-[#2d694f]">
+              {company.salary_summary.avg_midpoint ? `$${company.salary_summary.avg_midpoint}` : "N/A"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.4fr)_360px]">
+        <div className="space-y-8">
+          <Card className="rounded-none border border-[#d5d8db] shadow-none">
             <CardHeader>
-              <CardTitle>Ratings & Reviews</CardTitle>
-              <CardDescription>
-                Based on {companyReviews.length} verified CSU IS student reviews
-              </CardDescription>
+              <CardTitle className="text-[#2d694f]">Ratings and Reviews</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="text-center">
-                  <div className="text-5xl mb-2">{company.avgRating.toFixed(1)}</div>
-                  <div className="flex items-center justify-center mb-2">
-                    {[...Array(5)].map((_, i) => (
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                <div className="border border-[#d5d8db] p-6 text-center">
+                  <div className="text-5xl font-bold text-[#2d694f]">{company.avg_rating.toFixed(1)}</div>
+                  <div className="mt-3 flex items-center justify-center gap-1">
+                    {[...Array(5)].map((_, index) => (
                       <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.round(company.avgRating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }`}
+                        key={index}
+                        className={`h-5 w-5 ${index < Math.round(company.avg_rating) ? "fill-[#7ebc45] text-[#7ebc45]" : "text-gray-300"}`}
                       />
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {companyReviews.length} reviews
-                  </p>
+                  <p className="mt-3 text-sm text-[#5f6368]">{company.review_count} published reviews</p>
                 </div>
-                <div className="space-y-2">
-                  {ratingDistribution.map((dist) => (
-                    <div key={dist.rating} className="flex items-center space-x-3">
-                      <span className="text-sm w-8">{dist.rating} ★</span>
-                      <Progress value={dist.percentage} className="flex-1" />
-                      <span className="text-sm text-muted-foreground w-8">
-                        {dist.count}
-                      </span>
+                <div className="space-y-3">
+                  {ratingDistribution.map((distribution) => (
+                    <div key={distribution.rating} className="grid grid-cols-[48px_minmax(0,1fr)_32px] items-center gap-3">
+                      <span className="text-sm text-[#3d4348]">{distribution.rating} star</span>
+                      <div className="h-3 bg-[#edf1ee]">
+                        <div
+                          className="h-full bg-[#2d694f]"
+                          style={{
+                            width: company.review_count ? `${(distribution.count / company.review_count) * 100}%` : "0%",
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm text-[#5f6368]">{distribution.count}</span>
                     </div>
                   ))}
                 </div>
@@ -140,69 +301,61 @@ export function CompanyDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Reviews */}
           <div>
-            <h2 className="text-2xl mb-4">Student Reviews</h2>
-            {companyReviews.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">
-                    No reviews yet. Be the first to share your experience!
-                  </p>
+            <h2 className="mb-4 text-2xl font-bold text-[#2d694f]">Student Reviews</h2>
+            {company.reviews.length === 0 ? (
+              <Card className="rounded-none border border-[#d5d8db] shadow-none">
+                <CardContent className="py-12 text-center text-[#5f6368]">
+                  No reviews are published for this employer yet.
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
-                {companyReviews.map((review) => (
-                  <Card key={review.id}>
+                {company.reviews.map((review) => (
+                  <Card key={review.id} className="rounded-none border border-[#d5d8db] shadow-none">
                     <CardHeader>
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div>
-                          <CardTitle className="text-lg">
-                            {review.internshipRole}
-                          </CardTitle>
-                          <CardDescription>
-                            {review.userName} • {review.userRole}
-                          </CardDescription>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {review.semester} {review.year}
+                          <CardTitle className="text-lg text-[#2d694f]">{review.role}</CardTitle>
+                          <p className="mt-2 text-sm text-[#5f6368]">
+                            Posted {new Date(review.date_posted).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                          <span className="font-semibold text-lg">{review.rating}.0</span>
+                        <div className="flex items-center gap-2 text-[#2d694f]">
+                          <Star className="h-5 w-5 fill-[#7ebc45] text-[#7ebc45]" />
+                          <span className="text-lg font-semibold">{review.rating.toFixed(1)}</span>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 text-sm text-[#5f6368]">
                       <div>
-                        <p className="text-sm font-semibold mb-1">Pros</p>
-                        <p className="text-sm text-muted-foreground">{review.pros}</p>
+                        <p className="mb-1 font-semibold text-[#3d4348]">Pros</p>
+                        <p>{review.pros}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold mb-1">Cons</p>
-                        <p className="text-sm text-muted-foreground">{review.cons}</p>
+                        <p className="mb-1 font-semibold text-[#3d4348]">Cons</p>
+                        <p>{review.cons}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold mb-1">Interview Process</p>
-                        <p className="text-sm text-muted-foreground">{review.interview}</p>
+                        <p className="mb-1 font-semibold text-[#3d4348]">Interview Process</p>
+                        <p>{review.interview_process}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold mb-1">Recommendation</p>
-                        <p className="text-sm text-muted-foreground">
-                          {review.recommendation}
-                        </p>
+                        <p className="mb-1 font-semibold text-[#3d4348]">Recommendation</p>
+                        <p>{review.recommendation}</p>
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold mb-2">Skills Used</p>
-                        <div className="flex flex-wrap gap-2">
-                          {review.skills.map((skill) => (
-                            <Badge key={skill} variant="outline">
-                              {skill}
-                            </Badge>
-                          ))}
+                      {review.skills_used.length > 0 && (
+                        <div>
+                          <p className="mb-2 font-semibold text-[#3d4348]">Skills Used</p>
+                          <div className="flex flex-wrap gap-2">
+                            {review.skills_used.map((skill) => (
+                              <Badge key={skill} className="rounded-none border border-[#7ebc45] bg-white text-[#2d694f]">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -211,194 +364,132 @@ export function CompanyDetailPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Quick Stats */}
-          <Card>
+          <Card className="rounded-none border border-[#d5d8db] shadow-none">
             <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
+              <CardTitle className="text-[#2d694f]">Quick Stats</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 text-sm text-[#5f6368]">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">CSU Hires</span>
-                <div className="flex items-center space-x-1">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                  <span className="font-semibold">{company.csuHires}</span>
-                </div>
+                <span>Current roles</span>
+                <span className="font-semibold text-[#3d4348]">{company.job_count}</span>
               </div>
-              <Separator />
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Reviews</span>
-                <span className="font-semibold">{companyReviews.length}</span>
+                <span>Lowest current rate</span>
+                <span className="font-semibold text-[#3d4348]">
+                  {company.salary_summary.min_rate ? `$${company.salary_summary.min_rate}/hr` : "N/A"}
+                </span>
               </div>
-              <Separator />
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Avg. Salary</span>
-                <span className="font-semibold">
-                  {avgSalary > 0 ? `$${avgSalary.toFixed(0)}/hr` : "N/A"}
+                <span>Highest current rate</span>
+                <span className="font-semibold text-[#3d4348]">
+                  {company.salary_summary.max_rate ? `$${company.salary_summary.max_rate}/hr` : "N/A"}
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Internship Roles */}
-          <Card>
+          <Card className="rounded-none border border-[#d5d8db] shadow-none">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Briefcase className="h-5 w-5 mr-2" />
-                Internship Roles
+              <CardTitle className="flex items-center text-[#2d694f]">
+                <Briefcase className="mr-2 h-5 w-5" />
+                Current Roles
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {company.internshipRoles.map((role) => (
-                  <div
-                    key={role}
-                    className="flex items-center p-2 rounded-md hover:bg-gray-50"
-                  >
-                    <span className="text-sm">{role}</span>
-                  </div>
-                ))}
-              </div>
+            <CardContent className="space-y-3">
+              {company.jobs.map((job) => (
+                <div key={job.id} className="border border-[#d5d8db] p-4">
+                  <p className="font-semibold text-[#3d4348]">{job.title}</p>
+                  <p className="mt-1 text-sm text-[#5f6368]">{job.salary_range || "Pay not listed"}</p>
+                  <p className="mt-1 text-sm text-[#5f6368]">{job.location}</p>
+                </div>
+              ))}
+              <Link to="/jobs">
+                <Button variant="outline" className="mt-2 w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                  View Job Board
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
-          {/* Certifications & Training */}
-          {company.preferredCertifications && (
-            <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+          {company.certifications.length > 0 && (
+            <Card className="rounded-none border border-[#d5d8db] shadow-none">
               <CardHeader>
-                <CardTitle className="flex items-center text-green-800">
-                  <Award className="h-5 w-5 mr-2" />
-                  Certifications & Training
+                <CardTitle className="flex items-center text-[#2d694f]">
+                  <Award className="mr-2 h-5 w-5" />
+                  Certifications Seen In Roles
                 </CardTitle>
-                <CardDescription>
-                  📚 Boost your chances with these credentials
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Required */}
-                {company.preferredCertifications.required.length > 0 && (
-                  <div>
-                    <div className="flex items-center space-x-2 mb-3">
-                      <CheckCircle2 className="h-4 w-4 text-red-600" />
-                      <span className="text-sm font-bold text-red-700 uppercase tracking-wide">
-                        Required
-                      </span>
-                    </div>
-                    <div className="space-y-2 ml-6">
-                      {company.preferredCertifications.required.map((cert) => (
-                        <div
-                          key={cert}
-                          className="flex items-start space-x-2 bg-white p-3 rounded-lg border-2 border-red-200 shadow-sm"
-                        >
-                          <CheckCircle2 className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm font-medium text-gray-900">{cert}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Preferred */}
-                {company.preferredCertifications.preferred.length > 0 && (
-                  <div>
-                    <div className="flex items-center space-x-2 mb-3">
-                      <Award className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-bold text-green-700 uppercase tracking-wide">
-                        Preferred
-                      </span>
-                    </div>
-                    <div className="space-y-2 ml-6">
-                      {company.preferredCertifications.preferred.map((cert) => (
-                        <div
-                          key={cert}
-                          className="flex items-start space-x-2 bg-white p-3 rounded-lg border-2 border-green-200 shadow-sm"
-                        >
-                          <Award className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-800">{cert}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Helpful */}
-                {company.preferredCertifications.helpful.length > 0 && (
-                  <div>
-                    <div className="flex items-center space-x-2 mb-3">
-                      <Circle className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-bold text-blue-700 uppercase tracking-wide">
-                        Helpful
-                      </span>
-                    </div>
-                    <div className="space-y-2 ml-6">
-                      {company.preferredCertifications.helpful.map((cert) => (
-                        <div
-                          key={cert}
-                          className="flex items-start space-x-2 bg-white p-3 rounded-lg border border-blue-200 shadow-sm"
-                        >
-                          <Circle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">{cert}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-xs text-blue-900 leading-relaxed">
-                    💡 <strong>Pro Tip:</strong> Many of these certifications can be obtained through LinkedIn Learning, Coursera, or free resources. Check CSU library for access!
-                  </p>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {company.certifications.map((certification) => (
+                    <Badge key={certification} className="rounded-none border border-[#7ebc45] bg-white text-[#2d694f]">
+                      {certification}
+                    </Badge>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Salary Data */}
-          {companySalaries.length > 0 && (
-            <Card>
+          {company.alumni.length > 0 && (
+            <Card className="rounded-none border border-[#d5d8db] shadow-none">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <DollarSign className="h-5 w-5 mr-2" />
-                  Salary Data
+                <CardTitle className="flex items-center text-[#2d694f]">
+                  <Users className="mr-2 h-5 w-5" />
+                  CSU Alumni At This Employer
                 </CardTitle>
-                <CardDescription>Reported by CSU students</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {companySalaries.slice(0, 5).map((salary) => (
-                    <div key={salary.id} className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">{salary.role}</span>
-                        <span className="font-semibold">${salary.hourlyRate}/hr</span>
+              <CardContent className="space-y-3">
+                {alumniPreview.map((alumni) => (
+                  <div key={alumni.id} className="border border-[#d5d8db] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-[#3d4348]">{alumni.name}</p>
+                        <p className="mt-1 text-sm text-[#5f6368]">{alumni.role}</p>
+                        <p className="mt-1 text-sm text-[#5f6368]">Class of {alumni.graduation_year}</p>
+                        {alumni.headline && <p className="mt-2 text-sm text-[#5f6368]">{alumni.headline}</p>}
                       </div>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {salary.internshipType} • {salary.year}
-                      </p>
-                      {salary.id !== companySalaries[Math.min(4, companySalaries.length - 1)].id && (
-                        <Separator className="mt-2" />
-                      )}
+                      <div className="flex shrink-0 flex-col gap-2">
+                        {alumni.is_mentor && (
+                          <Badge className="rounded-none border border-[#7ebc45] bg-white text-[#2d694f]">
+                            Mentor
+                          </Badge>
+                        )}
+                        {alumni.open_to_questions && (
+                          <Badge className="rounded-none border border-[#7ebc45] bg-white text-[#2d694f]">
+                            Open to questions
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                  {companySalaries.length > 5 && (
-                    <Link to="/salaries">
-                      <Button variant="ghost" size="sm" className="w-full mt-2">
-                        View All Salaries
-                      </Button>
-                    </Link>
-                  )}
-                </div>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <Link to={`/alumni/${alumni.id}`}>
+                        <Button variant="outline" className="w-full rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                          View Alumni Profile
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+                {company.alumni.length > 3 && (
+                  <Link to={`/alumni?company=${company.id}`}>
+                    <Button className="w-full rounded-none bg-[#2d694f] hover:bg-[#274c37]">
+                      View More Alumni
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           )}
         </div>
       </div>
 
-      {user && (
+      {user && reviewCompany && (
         <ReviewSubmitModal
           open={reviewModalOpen}
           onOpenChange={setReviewModalOpen}
-          company={company}
+          company={reviewCompany}
           user={user}
         />
       )}

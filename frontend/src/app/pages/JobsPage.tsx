@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router";
+import { useLocation, useOutletContext } from "react-router";
 import { JobsBoard, JobRecord } from "../components/JobsBoard";
 import { SavedItems, User } from "../types/user";
 
 export function JobsPage() {
+  const location = useLocation();
   const { user, savedItems, toggleSavedItem, openAuthModal, refreshCurrentUser } = useOutletContext<{
     user: User | null;
     savedItems: SavedItems;
@@ -16,7 +17,9 @@ export function JobsPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://127.0.0.1:8000/api/jobs/")
+    fetch("http://127.0.0.1:8000/api/jobs/", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data: JobRecord[]) => {
         setJobs(data);
@@ -41,6 +44,7 @@ export function JobsPage() {
       toggleSavedItem={toggleSavedItem}
       openAuthModal={openAuthModal}
       refreshCurrentUser={refreshCurrentUser}
+      initialSelectedJobId={location.state?.selectedJobId}
     />
   );
 }

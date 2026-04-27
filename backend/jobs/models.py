@@ -273,16 +273,46 @@ class SavedAlumni(models.Model):
         ]
 
 
+class CertificationProgress(models.Model):
+    STATUS_CHOICES = [
+        ("interested", "Interested"),
+        ("planned", "Planned"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="certification_progress")
+    certification = models.ForeignKey(Certification, on_delete=models.CASCADE, related_name="progress_records")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="interested")
+    target_completion_date = models.DateField(blank=True, null=True)
+    notes = models.TextField(blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "certification"], name="unique_certification_progress"),
+        ]
+
+
 class JobApplication(models.Model):
     STATUS_CHOICES = [
         ("submitted", "Submitted"),
+        ("preparing", "Preparing"),
         ("reviewing", "Reviewing"),
+        ("interviewing", "Interviewing"),
+        ("offer", "Offer"),
+        ("rejected", "Rejected"),
+        ("withdrawn", "Withdrawn"),
         ("closed", "Closed"),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="job_applications")
     job = models.ForeignKey(JobPosting, on_delete=models.CASCADE, related_name="applications")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="submitted")
+    notes = models.TextField(blank=True, default="")
+    follow_up_date = models.DateField(blank=True, null=True)
+    stage_updated_at = models.DateTimeField(auto_now=True)
     resume_file = models.FileField(upload_to="applications/resumes/", blank=True, null=True)
     cover_letter_file = models.FileField(upload_to="applications/cover_letters/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

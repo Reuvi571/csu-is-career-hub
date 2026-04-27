@@ -36,11 +36,39 @@ interface Review {
   id: number;
 }
 
+interface StudentDashboard {
+  targetRoles: string[];
+  topSkillGaps: { name: string; jobCount: number }[];
+  recommendedCertifications: {
+    id: number;
+    name: string;
+    organization: string;
+    jobCount: number;
+    savedJobCount: number;
+    status: string;
+    why: string;
+  }[];
+  certificationProgress: {
+    certificationId: number;
+    name: string;
+    organization: string;
+    status: string;
+  }[];
+  applicationSummary: Record<string, number>;
+  stats: {
+    savedJobs: number;
+    completedCertifications: number;
+    activeCertificationPlans: number;
+    applications: number;
+  };
+}
+
 export function HomePage() {
   const { user } = useOutletContext<UserContext>();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,6 +91,25 @@ export function HomePage() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setDashboard(null);
+      return;
+    }
+
+    fetch("http://127.0.0.1:8000/api/student/dashboard/", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Unable to load dashboard");
+        }
+        return res.json();
+      })
+      .then((data: StudentDashboard) => setDashboard(data))
+      .catch(() => setDashboard(null));
+  }, [user]);
 
   const averageHourlyRate = useMemo(() => {
     const midpoints = jobs
@@ -106,7 +153,7 @@ export function HomePage() {
 
             <div className="max-w-4xl space-y-5 text-xl leading-relaxed text-[#5f6368]">
               <p>
-                The CSU IS Career Hub brings together active job postings, employer profiles, student reviews, certification links, and compensation data in one place.
+                CSU Career Launchpad brings together active job postings, employer profiles, student reviews, certification links, and compensation data in one place.
               </p>
               <p>
                 Use it to compare roles, understand what employers are looking for, and focus your search on the opportunities that best fit your goals.
@@ -157,6 +204,105 @@ export function HomePage() {
 
       <section className="border-t border-[#d5d8db] bg-white">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          {user && dashboard && (
+            <div className="mb-16 border border-[#d5d8db] bg-white">
+              <div className="border-b border-[#d5d8db] px-6 py-5">
+                <div className="mb-2 inline-flex items-center gap-2 border border-[#7ebc45] bg-white px-3 py-1 text-sm font-semibold text-[#2d694f]">
+                  <Award className="h-4 w-4" aria-hidden="true" />
+                  Personalized next steps
+                </div>
+                <h2 className="text-3xl font-bold text-[#2d694f]">Career readiness snapshot</h2>
+                <p className="mt-2 max-w-3xl text-sm text-[#5f6368]">
+                  Use your saved jobs, target roles, certification progress, and application history to decide what to do next.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 border-b border-[#d5d8db] md:grid-cols-4">
+                <div className="border-b border-[#d5d8db] p-6 md:border-b-0 md:border-r">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Saved jobs</p>
+                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">{dashboard.stats.savedJobs}</p>
+                </div>
+                <div className="border-b border-[#d5d8db] p-6 md:border-b-0 md:border-r">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Active learning plan</p>
+                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">{dashboard.stats.activeCertificationPlans}</p>
+                </div>
+                <div className="border-b border-[#d5d8db] p-6 md:border-b-0 md:border-r">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Completed certifications</p>
+                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">{dashboard.stats.completedCertifications}</p>
+                </div>
+                <div className="p-6">
+                  <p className="text-sm font-semibold uppercase tracking-wide text-[#2d694f]">Applications</p>
+                  <p className="mt-2 text-4xl font-bold text-[#2d694f]">{dashboard.stats.applications}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="border-b border-[#d5d8db] p-6 lg:border-b-0 lg:border-r">
+                  <h3 className="text-2xl font-bold text-[#2d694f]">Recommended certifications</h3>
+                  <div className="mt-5 space-y-4">
+                    {dashboard.recommendedCertifications.length === 0 ? (
+                      <p className="text-sm text-[#5f6368]">Save jobs or set target roles to get tailored certification recommendations.</p>
+                    ) : (
+                      dashboard.recommendedCertifications.slice(0, 4).map((certification) => (
+                        <div key={certification.id} className="border border-[#d5d8db] p-4">
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-[#3d4348]">{certification.name}</p>
+                              <p className="mt-1 text-sm text-[#5f6368]">{certification.organization}</p>
+                              <p className="mt-2 text-sm text-[#5f6368]">{certification.why}</p>
+                            </div>
+                            <Badge variant="secondary" className="capitalize">
+                              {certification.status.replace("_", " ")}
+                            </Badge>
+                          </div>
+                          <Button asChild variant="outline" className="mt-4 rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                            <Link to={`/certifications/${certification.id}`}>Open certification</Link>
+                          </Button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-[#2d694f]">Top skill gaps</h3>
+                  <div className="mt-5 space-y-4">
+                    {dashboard.topSkillGaps.length === 0 ? (
+                      <p className="text-sm text-[#5f6368]">Your saved jobs do not show any clear certification gaps yet.</p>
+                    ) : (
+                      dashboard.topSkillGaps.map((gap) => (
+                        <div key={gap.name} className="border border-[#d5d8db] p-4">
+                          <div className="flex items-center justify-between gap-4">
+                            <div>
+                              <p className="font-semibold text-[#3d4348]">{gap.name}</p>
+                              <p className="mt-1 text-sm text-[#5f6368]">Appears across {gap.jobCount} matching roles</p>
+                            </div>
+                            <Badge className="border border-[#7ebc45] bg-white text-[#2d694f]">{gap.jobCount}</Badge>
+                          </div>
+                        </div>
+                      ))
+                    )}
+
+                    <div className="border border-[#d5d8db] p-4">
+                      <h4 className="font-semibold text-[#3d4348]">Application pipeline</h4>
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-[#5f6368]">
+                        {Object.entries(dashboard.applicationSummary).filter(([, count]) => count > 0).map(([status, count]) => (
+                          <div key={status} className="flex items-center justify-between border border-[#d5d8db] px-3 py-2">
+                            <span className="capitalize">{status.replace("_", " ")}</span>
+                            <span className="font-semibold text-[#2d694f]">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <Button asChild variant="outline" className="mt-4 rounded-none border-[#2d694f] text-[#2d694f] hover:bg-white hover:text-[#274c37]">
+                        <Link to="/applications">Manage applications</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <div className="mb-3 inline-block border border-[#7ebc45] bg-white px-3 py-1 text-sm font-semibold text-[#2d694f]">

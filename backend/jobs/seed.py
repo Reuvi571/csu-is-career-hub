@@ -9,7 +9,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model
-from jobs.models import Company, Role, Certification, JobPosting, CompanyReview, SalaryReport, CareerUserProfile, Alumni, SavedJob, SavedCompany, SavedCertification, SavedAlumni, JobApplication
+from jobs.models import Company, Role, Certification, JobPosting, CompanyReview, SalaryReport, CareerUserProfile, Alumni, SavedJob, SavedCompany, SavedCertification, SavedAlumni, JobApplication, CertificationProgress
 from django.utils import timezone
 
 User = get_user_model()
@@ -56,6 +56,7 @@ def run():
     SavedCompany.objects.all().delete()
     SavedCertification.objects.all().delete()
     SavedAlumni.objects.all().delete()
+    CertificationProgress.objects.all().delete()
     JobApplication.objects.all().delete()
     Alumni.objects.all().delete()
     JobPosting.objects.all().delete()
@@ -980,6 +981,25 @@ def run():
     SavedCompany.objects.create(user=users["student"], company=companies["Hyland"])
     SavedCertification.objects.create(user=users["student"], certification=certs["AWS"])
     SavedAlumni.objects.create(user=users["student"], alumni=Alumni.objects.get(name="Alyssa Brooks"))
+
+    CertificationProgress.objects.create(
+        user=users["student"],
+        certification=certs["SQL"],
+        status="in_progress",
+        notes="Working through SQL practice and dashboard query exercises.",
+    )
+    CertificationProgress.objects.create(
+        user=users["student"],
+        certification=certs["PowerBI"],
+        status="planned",
+        notes="Next step after SQL to strengthen analytics readiness.",
+    )
+    CertificationProgress.objects.create(
+        user=users["student"],
+        certification=certs["AWS"],
+        status="completed",
+        notes="Completed foundational cloud coursework.",
+    )
 
     print("✅ FULL seed loaded )")
 

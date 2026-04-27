@@ -32,6 +32,17 @@ export interface JobRecord {
   certifications: string[];
   roles: string[];
   date_posted: string;
+  readiness?: {
+    level: "unknown" | "early" | "developing" | "competitive";
+    score: number;
+    matchedCount: number;
+    supportingCount: number;
+    totalSignals: number;
+    matchedCertifications: string[];
+    missingCertifications: string[];
+    recommendedCertificationIds: number[];
+    reason: string;
+  };
 }
 
 interface JobsBoardProps {
@@ -46,6 +57,7 @@ interface JobsBoardProps {
   openAuthModal: () => void;
   refreshCurrentUser: () => Promise<void> | void;
   savedOnly?: boolean;
+  initialSelectedJobId?: string;
 }
 
 const ALLOWED_DOCUMENT_EXTENSIONS = [".pdf", ".doc", ".docx"];
@@ -57,6 +69,32 @@ function isAcceptedDocument(file: File | null) {
 
   const fileName = file.name.toLowerCase();
   return ALLOWED_DOCUMENT_EXTENSIONS.some((extension) => fileName.endsWith(extension));
+}
+
+function readinessTone(level?: string) {
+  if (level === "competitive") {
+    return "bg-[#2d694f] text-white";
+  }
+  if (level === "developing") {
+    return "border border-[#7ebc45] bg-white text-[#2d694f]";
+  }
+  if (level === "early") {
+    return "border border-[#d5d8db] bg-white text-[#5f6368]";
+  }
+  return "border border-[#d5d8db] bg-white text-[#5f6368]";
+}
+
+function readinessLabel(level?: string) {
+  if (level === "competitive") {
+    return "Strong fit";
+  }
+  if (level === "developing") {
+    return "Getting closer";
+  }
+  if (level === "early") {
+    return "Early fit";
+  }
+  return "Sign in for fit";
 }
 
 export function JobsBoard({
@@ -71,6 +109,7 @@ export function JobsBoard({
   openAuthModal,
   refreshCurrentUser,
   savedOnly = false,
+  initialSelectedJobId,
 }: JobsBoardProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [boardJobs, setBoardJobs] = useState<JobRecord[]>(jobs);
@@ -125,7 +164,7 @@ export function JobsBoard({
   }, [filteredJobs, selectedJob]);
 
   useEffect(() => {
-    const selectedFromQuery = searchParams.get("job");
+    const selectedFromQuery = searchParams.get("job") || initialSelectedJobId;
     if (!selectedFromQuery) {
       return;
     }
@@ -134,7 +173,15 @@ export function JobsBoard({
     if (matchedJob && matchedJob.id !== selectedJob?.id) {
       setSelectedJob(matchedJob);
     }
-  }, [boardJobs, searchParams, selectedJob]);
+  }, [boardJobs, initialSelectedJobId, searchParams, selectedJob]);
+
+  useEffect(() => {
+    if (!initialSelectedJobId || searchParams.get("job")) {
+      return;
+    }
+
+    setSearchParams({ job: initialSelectedJobId }, { replace: true });
+  }, [initialSelectedJobId, searchParams, setSearchParams]);
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -277,7 +324,7 @@ export function JobsBoard({
       }
 
       await refreshCurrentUser();
-      toast.success(data.created ? "Application submitted through CSU Careers." : "You already applied to this posting.");
+      toast.success(data.created ? "Application submitted through CSU Career Launchpad." : "You already applied to this posting.");
       resetApplicationDialog();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to submit application");
@@ -669,6 +716,80 @@ export function JobsBoard({
                   </p>
                 </div>
               </div>
+
+              {selectedJob.readiness && (
+                <div className="rounded-lg border border-gray-200 bg-white p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-[#2d694f]">Estimated Fit</h3>
+                      <p className="mt-2 text-sm text-gray-600">{selectedJob.readiness.reason}</p>
+                    </div>
+                    <Badge className={readinessTone(selectedJob.readiness.level)}>
+                      {readinessLabel(selectedJob.readiness.level)}
+                    </Badge>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <div className="mb-2 flex items-center justify-between text-sm font-semibold text-[#2d694f]">
+                        <span>Rough fit estimate</span>
+                        <span>{selectedJob.readiness.score}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100">
+                        <div className="h-2 bg-[#7ebc45]" style={{ width: `${selectedJob.readiness.score}%` }} />
+                      </div>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Based on certifications you have marked as completed or in progress, plus your target role and preferred location.
+                        This is guidance, not a hiring prediction.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="border border-[#d5d8db] p-4">
+                        <p className="text-xs font-semibold uppercase text-[#2d694f]">Completed certifications</p>
+                        <p className="mt-2 text-3xl font-bold text-[#2d694f]">{selectedJob.readiness.matchedCount}</p>
+                        <p className="mt-2 text-xs text-gray-500">Certifications tied to this role that you already marked completed.</p>
+                      </div>
+                      <div className="border border-[#d5d8db] p-4">
+                        <p className="text-xs font-semibold uppercase text-[#2d694f]">Started</p>
+                        <p className="mt-2 text-3xl font-bold text-[#2d694f]">{selectedJob.readiness.supportingCount}</p>
+                        <p className="mt-2 text-xs text-gray-500">Certifications for this role that you marked planned or in progress.</p>
+                      </div>
+                      <div className="border border-[#d5d8db] p-4">
+                        <p className="text-xs font-semibold uppercase text-[#2d694f]">Role certifications listed</p>
+                        <p className="mt-2 text-3xl font-bold text-[#2d694f]">{selectedJob.readiness.totalSignals}</p>
+                        <p className="mt-2 text-xs text-gray-500">Certifications attached to this posting by the site data.</p>
+                      </div>
+                    </div>
+
+                    {selectedJob.readiness.missingCertifications.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-sm font-semibold text-[#2d694f]">Best next certifications to focus on</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedJob.readiness.missingCertifications.map((gap) => (
+                            <Badge key={gap} variant="secondary" className="border border-[#d5d8db] bg-white text-[#3d4348]">
+                              {gap}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedJob.readiness.matchedCertifications.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-sm font-semibold text-[#2d694f]">Already helping your fit</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedJob.readiness.matchedCertifications.map((certification) => (
+                            <Badge key={certification} className="border border-[#7ebc45] bg-white text-[#2d694f]">
+                              {certification}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h3 className="mb-3 text-lg font-bold text-[#2d694f]">About this role</h3>

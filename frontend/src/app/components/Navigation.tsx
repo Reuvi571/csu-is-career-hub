@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router";
 import { useTheme } from "next-themes";
 import { User } from "../types/user";
 import { Button } from "./ui/button";
-import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House, Settings, ArrowRightLeft, Moon, Bookmark, FileText } from "lucide-react";
+import { Briefcase, Building2, Star, DollarSign, Shield, LogOut, Users, Award, House, Settings, ArrowRightLeft, Moon, Bookmark, FileText, CheckSquare } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Switch } from "./ui/switch";
@@ -49,13 +49,13 @@ export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: Na
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section - Left */}
-          <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
-            <div className="flex flex-col justify-start leading-tight">
-              <div className="text-sm font-bold text-white tracking-tight">
-                <span>CSU</span>
-                <span className="ml-1 font-black text-[#7ebc45]">IS</span>
-              </div>
-              <div className="text-xs font-semibold text-white/85">Careers</div>
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <div className="flex items-center rounded-sm bg-white px-3 py-2 shadow-sm">
+              <img
+                src="/assets/csu-logo-email-signature.png"
+                alt="Cleveland State University"
+                className="h-7 w-auto sm:h-8"
+              />
             </div>
           </Link>
 
@@ -140,6 +140,20 @@ export function Navigation({ user, onLoginClick, onLogout, onSwitchAccount }: Na
                       <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
                         <Bookmark className="mr-2 h-4 w-4" />
                         Saved Jobs
+                      </Button>
+                    </Link>
+
+                    <Link to="/saved-certifications">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <Award className="mr-2 h-4 w-4" />
+                        Saved Certifications
+                      </Button>
+                    </Link>
+
+                    <Link to="/learning-plan">
+                      <Button variant="outline" className="w-full justify-start rounded-none border-[#2d694f] text-[#2d694f] hover:bg-background hover:text-[#274c37] dark:border-[#7ebc45] dark:text-[#dce9dc] dark:hover:bg-[#232826] dark:hover:text-white">
+                        <CheckSquare className="mr-2 h-4 w-4" />
+                        Learning Plan
                       </Button>
                     </Link>
 

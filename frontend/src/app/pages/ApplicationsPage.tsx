@@ -28,6 +28,9 @@ interface ApplicationRecord {
     rejection_note: string;
   };
   status: string;
+  notes: string;
+  followUpDate: string | null;
+  stageUpdatedAt: string;
   createdAt: string;
   resumeFile: { name: string; url: string } | null;
   coverLetterFile: { name: string; url: string } | null;
@@ -46,6 +49,7 @@ export function ApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [selected, setSelected] = useState<ApplicationRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [savingStage, setSavingStage] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -107,6 +111,35 @@ export function ApplicationsPage() {
       </div>
     );
   }
+
+  const handleStageUpdate = async (updates: Partial<Pick<ApplicationRecord, "status" | "notes" | "followUpDate">>) => {
+    if (!selected) {
+      return;
+    }
+
+    setSavingStage(true);
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/applications/${selected.id}/stage/`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updates),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to update application");
+      }
+
+      setApplications((prev) => prev.map((item) => item.id === selected.id ? data.application : item));
+      setSelected(data.application);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSavingStage(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,6 +213,55 @@ export function ApplicationsPage() {
                     <Clock className="h-3 w-3" />
                     Submitted {new Date(selected.createdAt).toLocaleDateString()}
                   </Badge>
+                </div>
+              </div>
+
+              <div className="rounded-none border border-[#d5d8db] bg-white p-6">
+                <h3 className="mb-4 text-lg font-bold text-[#2d694f]">Pipeline tracking</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#2d694f]">Application stage</label>
+                    <select
+                      value={selected.status}
+                      onChange={(event) => handleStageUpdate({ status: event.target.value })}
+                      className="h-11 w-full rounded-none border border-[#d5d8db] bg-white px-3 py-2 text-sm"
+                      disabled={savingStage}
+                    >
+                      <option value="preparing">Preparing</option>
+                      <option value="submitted">Submitted</option>
+                      <option value="reviewing">Reviewing</option>
+                      <option value="interviewing">Interviewing</option>
+                      <option value="offer">Offer</option>
+                      <option value="rejected">Rejected</option>
+                      <option value="withdrawn">Withdrawn</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#2d694f]">Follow-up date</label>
+                    <input
+                      type="date"
+                      value={selected.followUpDate ?? ""}
+                      onChange={(event) => handleStageUpdate({ followUpDate: event.target.value || null })}
+                      className="h-11 w-full rounded-none border border-[#d5d8db] bg-white px-3 py-2 text-sm"
+                      disabled={savingStage}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="mb-2 block text-sm font-semibold text-[#2d694f]">Notes</label>
+                  <textarea
+                    value={selected.notes}
+                    onChange={(event) => setSelected({ ...selected, notes: event.target.value })}
+                    onBlur={() => handleStageUpdate({ notes: selected.notes })}
+                    className="min-h-[120px] w-full rounded-none border border-[#d5d8db] bg-white px-3 py-2 text-sm"
+                    placeholder="Add interview details, reminders, or follow-up notes."
+                    disabled={savingStage}
+                  />
+                  <p className="mt-2 text-xs text-[#5f6368]">
+                    Last updated {new Date(selected.stageUpdatedAt).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
 

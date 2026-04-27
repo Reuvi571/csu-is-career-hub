@@ -19,11 +19,13 @@ export interface SavedItems {
   jobIds: string[];
   companyIds: number[];
   certificationIds: number[];
+  certificationProgressIds: number[];
   alumniIds: number[];
   appliedJobIds: string[];
   jobs: { id: string; title: string; companyName: string }[];
   companies: { id: number; name: string; location: string }[];
   certifications: { id: number; name: string; organization: string; officialUrl?: string }[];
+  certificationProgress: { id: number; status: string; targetCompletionDate?: string | null; notes?: string; updatedAt: string }[];
   alumni: { id: number; name: string; role: string; companyName: string }[];
   applications: { jobId: string; title: string; companyName: string; status: string; createdAt: string }[];
 }

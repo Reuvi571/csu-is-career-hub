@@ -10,8 +10,8 @@
 
 ## 📊 Week 10: Performance & Analytics Report
 * **CI/CD Architecture:** Dual-environment GitHub Actions workflow (`ci.yml`) runs `manage.py check` (Python 3.12) and compiles Vite (Node 20) on every push.
-* **Performance Optimization (Lighthouse):** Refactored `routes.tsx` to use `React.lazy()`. *Tradeoff:* Users experience a brief 500ms loading state on initial tab navigation, but the initial Time-to-Interactive payload is massively reduced.
-* **Event Analytics:** Integrated a custom user-event logger on the Jobs page to track interactions for future database ingestion without relying on heavy third-party trackers.
+* **Performance Optimization (Lighthouse):** Refactored `routes.tsx` to use `React.lazy()`. *Tradeoff:* Users experience a brief 500ms loading state on initial tab navigation, but the initial Time-to-Interactive payload is massively reduced. **By testing the minified production build, our Lighthouse Performance score jumped from an unoptimized baseline of 58 up to a 97.**
+* **Event Analytics:** Integrated a custom user-event logger (`JOB_VIEW`) on the Jobs page to track interactions for future database ingestion without relying on heavy third-party trackers.
 
 ---
 
@@ -38,6 +38,8 @@ To ensure a high-quality product, our team integrated the following standards fr
 * **Team Lead:** Ruben Lipins 
 * **Developers:** Allen Nozic, William R. Jackson, Madhav Ashokbhai Bhalani, Anthony Doly
 
+---
+
 ## 🚀 Quick Start
 ### Backend
 1. `cd backend`
@@ -48,6 +50,8 @@ To ensure a high-quality product, our team integrated the following standards fr
 1. `cd frontend`
 2. `npm install`
 3. `npm run dev`
+
+---
 
 ## 🤖 AI Usage Declaration
 Utilized Google Gemini for:

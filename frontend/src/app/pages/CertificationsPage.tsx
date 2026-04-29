@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { PageIntro } from "../components/PageIntro";
@@ -19,10 +19,17 @@ interface Certification {
   organization: string;
   roles: string[];
   job_count: number;
+  recommended?: boolean;
+  progress?: {
+    status: string;
+    targetCompletionDate?: string | null;
+    notes?: string;
+  } | null;
 }
 
 export function CertificationsPage() {
   const navigate = useNavigate();
+  const { user } = useOutletContext<{ user: { id?: string } | null }>();
   const [certifications, setcertifications] = useState<Certification[]>([]);
   const [filteredCertifications, setFilteredCertifications] =
     useState<Certification[]>([]);
@@ -32,7 +39,9 @@ export function CertificationsPage() {
 
   // Fetch all certifications
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/certifications/")
+    fetch("http://127.0.0.1:8000/api/certifications/", {
+      credentials: "include",
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log("CERTIFICATIONS:", data);
@@ -129,6 +138,19 @@ export function CertificationsPage() {
                   </p>
                 </div>
                 <Award className="h-5 w-5 text-[#7ebc45] flex-shrink-0" />
+              </div>
+
+              <div className="mb-3 flex flex-wrap gap-2">
+                {cert.recommended && (
+                  <Badge className="border border-[#7ebc45] bg-white text-[#2d694f]">
+                    Recommended for you
+                  </Badge>
+                )}
+                {user && cert.progress?.status && (
+                  <Badge variant="secondary" className="capitalize">
+                    {cert.progress.status.replace("_", " ")}
+                  </Badge>
+                )}
               </div>
 
               <p className="text-gray-700 text-sm mb-4 line-clamp-2">

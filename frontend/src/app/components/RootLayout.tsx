@@ -10,11 +10,13 @@ const emptySavedItems: SavedItems = {
   jobIds: [],
   companyIds: [],
   certificationIds: [],
+  certificationProgressIds: [],
   alumniIds: [],
   appliedJobIds: [],
   jobs: [],
   companies: [],
   certifications: [],
+  certificationProgress: [],
   alumni: [],
   applications: [],
 };
@@ -139,6 +141,7 @@ export function RootLayout() {
             toggleSavedItem,
             openAuthModal: () => setAuthModalOpen(true),
             refreshCurrentUser: loadCurrentUser,
+            refreshSavedItems: loadSavedItems,
           }}
         />
       </main>

@@ -9,7 +9,7 @@ export function SavedJobsPage() {
     user: User | null;
     loadingUser: boolean;
     savedItems: SavedItems;
-    toggleSavedItem: (itemType: "job", itemId: string) => Promise<boolean>;
+    toggleSavedItem: (itemType: "job", itemId: string | number) => Promise<boolean>;
     openAuthModal: () => void;
     refreshCurrentUser: () => Promise<void> | void;
   }>();

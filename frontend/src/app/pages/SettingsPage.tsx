@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 import { ArrowLeft, Bookmark, Building2, GraduationCap, Award, Users } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -15,6 +15,16 @@ interface RootContext {
   refreshCurrentUser: () => Promise<void> | void;
 }
 
+interface StudentDashboard {
+  topSkillGaps: { name: string; jobCount: number }[];
+  certificationProgress: {
+    certificationId: number;
+    name: string;
+    organization: string;
+    status: string;
+  }[];
+}
+
 export function SettingsPage() {
   const navigate = useNavigate();
   const { user, savedItems, refreshCurrentUser } = useOutletContext<RootContext>();
@@ -28,6 +38,7 @@ export function SettingsPage() {
     bio: "",
   });
   const [saving, setSaving] = useState(false);
+  const [dashboard, setDashboard] = useState<StudentDashboard | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -43,6 +54,25 @@ export function SettingsPage() {
       preferredLocation: user.preferredLocation,
       bio: user.bio,
     });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setDashboard(null);
+      return;
+    }
+
+    fetch("http://127.0.0.1:8000/api/student/dashboard/", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Unable to load dashboard");
+        }
+        return res.json();
+      })
+      .then((data: StudentDashboard) => setDashboard(data))
+      .catch(() => setDashboard(null));
   }, [user]);
 
   if (!user) {
@@ -178,19 +208,16 @@ export function SettingsPage() {
 
           <Card className="rounded-none border border-[#d5d8db] shadow-none">
             <CardHeader>
-              <CardTitle className="text-[#2d694f]">Recent saved jobs</CardTitle>
+              <CardTitle className="text-[#2d694f]">Readiness gaps</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {savedItems.jobs.length === 0 ? (
-                <p className="text-sm text-[#5f6368]">No saved jobs yet.</p>
+              {!dashboard || dashboard.topSkillGaps.length === 0 ? (
+                <p className="text-sm text-[#5f6368]">Save jobs or set target roles to highlight your most common gaps.</p>
               ) : (
-                savedItems.jobs.slice(0, 4).map((job) => (
-                  <div key={job.id} className="border border-[#d5d8db] p-4">
-                    <p className="font-semibold text-[#3d4348]">{job.title}</p>
-                    <p className="mt-1 text-sm text-[#5f6368]">{job.companyName}</p>
-                    <Link to={`/jobs?job=${job.id}`} className="mt-3 inline-block text-sm font-semibold text-[#2d694f] hover:underline">
-                      Open posting
-                    </Link>
+                dashboard.topSkillGaps.map((gap) => (
+                  <div key={gap.name} className="border border-[#d5d8db] p-4">
+                    <p className="font-semibold text-[#3d4348]">{gap.name}</p>
+                    <p className="mt-1 text-sm text-[#5f6368]">Appears in {gap.jobCount} matching jobs</p>
                   </div>
                 ))
               )}
@@ -199,27 +226,22 @@ export function SettingsPage() {
 
           <Card className="rounded-none border border-[#d5d8db] shadow-none">
             <CardHeader>
-              <CardTitle className="text-[#2d694f]">Saved network and research</CardTitle>
+              <CardTitle className="text-[#2d694f]">Certification plan</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {savedItems.companies.slice(0, 2).map((company) => (
-                <div key={`company-${company.id}`} className="border border-[#d5d8db] p-4">
-                  <p className="font-semibold text-[#3d4348]">{company.name}</p>
-                  <p className="mt-1 text-sm text-[#5f6368]">{company.location}</p>
-                </div>
-              ))}
-              {savedItems.certifications.slice(0, 2).map((certification) => (
-                <div key={`certification-${certification.id}`} className="border border-[#d5d8db] p-4">
-                  <p className="font-semibold text-[#3d4348]">{certification.name}</p>
-                  <p className="mt-1 text-sm text-[#5f6368]">{certification.organization}</p>
-                </div>
-              ))}
-              {savedItems.alumni.slice(0, 2).map((alumni) => (
-                <div key={`alumni-${alumni.id}`} className="border border-[#d5d8db] p-4">
-                  <p className="font-semibold text-[#3d4348]">{alumni.name}</p>
-                  <p className="mt-1 text-sm text-[#5f6368]">{alumni.role} at {alumni.companyName}</p>
-                </div>
-              ))}
+              {!dashboard || dashboard.certificationProgress.length === 0 ? (
+                <p className="text-sm text-[#5f6368]">Mark certifications as planned, in progress, or completed to build your learning plan.</p>
+              ) : (
+                dashboard.certificationProgress.slice(0, 5).map((certification) => (
+                  <div key={certification.certificationId} className="border border-[#d5d8db] p-4">
+                    <p className="font-semibold text-[#3d4348]">{certification.name}</p>
+                    <p className="mt-1 text-sm text-[#5f6368]">{certification.organization}</p>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[#2d694f]">
+                      {certification.status.replace("_", " ")}
+                    </p>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>

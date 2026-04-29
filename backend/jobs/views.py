@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from .models import JobPosting, CompanyReview, Company, Certification, SalaryReport, CareerUserProfile, Alumni, SavedJob, SavedCompany, SavedCertification, SavedAlumni, JobApplication
+from .models import JobPosting, CompanyReview, Company, Certification, SalaryReport, CareerUserProfile, Alumni, SavedJob, SavedCompany, SavedCertification, SavedAlumni, JobApplication, CertificationProgress
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Q, Avg, Count
@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model, login, logout, authenticate
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.core.files.base import File
+from django.utils.dateparse import parse_date
 import json
 
 
@@ -107,7 +108,7 @@ def serialize_review(review):
     }
 
 
-def serialize_job(job):
+def serialize_job(job, user=None):
     return {
         "id": str(job.id),
         "title": job.title,
@@ -129,6 +130,7 @@ def serialize_job(job):
         "date_posted": job.date_posted.strftime("%Y-%m-%d"),
         "status": job.status,
         "rejection_note": job.rejection_note,
+        "readiness": build_job_readiness(job, user or getattr(job, "_request_user", None)),
     }
 
 
@@ -167,11 +169,13 @@ def serialize_saved_items(user):
     saved_certifications = SavedCertification.objects.select_related("certification").filter(user=user).order_by("-created_at")
     saved_alumni = SavedAlumni.objects.select_related("alumni", "alumni__company").filter(user=user).order_by("-created_at")
     applications = JobApplication.objects.select_related("job", "job__company").filter(user=user).order_by("-created_at")
+    certification_progress = CertificationProgress.objects.select_related("certification").filter(user=user)
 
     return {
         "jobIds": [str(record.job_id) for record in saved_jobs],
         "companyIds": [record.company_id for record in saved_companies],
         "certificationIds": [record.certification_id for record in saved_certifications],
+        "certificationProgressIds": [record.certification_id for record in certification_progress],
         "alumniIds": [record.alumni_id for record in saved_alumni],
         "appliedJobIds": [str(record.job_id) for record in applications],
         "jobs": [
@@ -199,6 +203,16 @@ def serialize_saved_items(user):
             }
             for record in saved_certifications
         ],
+        "certificationProgress": [
+            {
+                "id": record.certification_id,
+                "status": record.status,
+                "targetCompletionDate": record.target_completion_date.isoformat() if record.target_completion_date else None,
+                "notes": record.notes,
+                "updatedAt": record.updated_at.isoformat(),
+            }
+            for record in certification_progress
+        ],
         "alumni": [
             {
                 "id": record.alumni_id,
@@ -224,8 +238,11 @@ def serialize_saved_items(user):
 def serialize_application(application):
     return {
         "id": application.id,
-        "job": serialize_job(application.job),
+        "job": serialize_job(application.job, application.user),
         "status": application.status,
+        "notes": application.notes,
+        "followUpDate": application.follow_up_date.isoformat() if application.follow_up_date else None,
+        "stageUpdatedAt": application.stage_updated_at.isoformat(),
         "createdAt": application.created_at.isoformat(),
         "resumeFile": {
             "name": application.resume_file.name.split("/")[-1],
@@ -235,6 +252,203 @@ def serialize_application(application):
             "name": application.cover_letter_file.name.split("/")[-1],
             "url": application.cover_letter_file.url,
         } if application.cover_letter_file else None,
+    }
+
+
+def serialize_certification_progress(record):
+    return {
+        "certificationId": record.certification_id,
+        "status": record.status,
+        "targetCompletionDate": record.target_completion_date.isoformat() if record.target_completion_date else None,
+        "notes": record.notes,
+        "updatedAt": record.updated_at.isoformat(),
+    }
+
+
+def get_user_completed_certification_ids(user):
+    if not user.is_authenticated:
+        return set()
+
+    return set(
+        CertificationProgress.objects.filter(user=user, status="completed").values_list("certification_id", flat=True)
+    )
+
+
+def get_user_in_progress_certification_ids(user):
+    if not user.is_authenticated:
+        return set()
+
+    return set(
+        CertificationProgress.objects.filter(user=user, status__in=["planned", "in_progress"]).values_list("certification_id", flat=True)
+    )
+
+
+def get_profile_target_roles(user):
+    profile = getattr(user, "career_profile", None) if user.is_authenticated else None
+    return csv_to_list(profile.target_roles) if profile else []
+
+
+def build_job_readiness(job, user):
+    cert_records = list(job.certifications.all())
+    total_required = len(cert_records)
+    target_roles = get_profile_target_roles(user)
+    preferred_location = ""
+    if user.is_authenticated and getattr(user, "career_profile", None):
+        preferred_location = user.career_profile.preferred_location.strip().lower()
+
+    if not user.is_authenticated:
+        return {
+            "level": "unknown",
+            "score": 0,
+            "matchedCount": 0,
+            "supportingCount": 0,
+            "totalSignals": total_required,
+            "matchedCertifications": [],
+            "missingCertifications": [cert.name for cert in cert_records],
+            "recommendedCertificationIds": [cert.id for cert in cert_records[:3]],
+            "reason": "Sign in to see your readiness for this role.",
+        }
+
+    completed_ids = get_user_completed_certification_ids(user)
+    in_progress_ids = get_user_in_progress_certification_ids(user)
+
+    matched_certs = [cert.name for cert in cert_records if cert.id in completed_ids]
+    supporting_certs = [cert.name for cert in cert_records if cert.id in in_progress_ids]
+    missing_certs = [cert for cert in cert_records if cert.id not in completed_ids and cert.id not in in_progress_ids]
+
+    score = 0.0
+    if total_required:
+        score += len(matched_certs) / total_required * 70
+        score += len(supporting_certs) / total_required * 20
+    else:
+        score += 60
+
+    if target_roles and any(role.name in target_roles for role in job.roles.all()):
+        score += 15
+
+    if preferred_location and preferred_location in (job.location or "").lower():
+        score += 15
+
+    rounded_score = min(100, round(score))
+    if rounded_score >= 80:
+        level = "competitive"
+    elif rounded_score >= 50:
+        level = "developing"
+    else:
+        level = "early"
+
+    if total_required == 0:
+        reason = "This role does not list formal certifications, so your role and location preferences drive the fit."
+    elif missing_certs:
+        reason = f"Completing {', '.join(cert.name for cert in missing_certs[:2])} would improve your fit for this role."
+    else:
+        reason = "You already match the listed certification signals for this role."
+
+    return {
+        "level": level,
+        "score": rounded_score,
+        "matchedCount": len(matched_certs),
+        "supportingCount": len(supporting_certs),
+        "totalSignals": total_required,
+        "matchedCertifications": matched_certs,
+        "missingCertifications": [cert.name for cert in missing_certs],
+        "recommendedCertificationIds": [cert.id for cert in missing_certs[:3]],
+        "reason": reason,
+    }
+
+
+def build_student_dashboard(user):
+    target_roles = get_profile_target_roles(user)
+    completed_ids = get_user_completed_certification_ids(user)
+    in_progress_ids = get_user_in_progress_certification_ids(user)
+    saved_job_ids = list(SavedJob.objects.filter(user=user).values_list("job_id", flat=True))
+
+    cutoff = timezone.now().date() - timedelta(days=16)
+    active_jobs = JobPosting.objects.filter(date_posted__gte=cutoff, status="published").prefetch_related("roles", "certifications").select_related("company")
+    focused_jobs = active_jobs
+    if saved_job_ids:
+        focused_jobs = active_jobs.filter(Q(id__in=saved_job_ids))
+    elif target_roles:
+        focused_jobs = active_jobs.filter(roles__name__in=target_roles).distinct()
+
+    gap_counter = {}
+    certification_scores = {}
+    impacting_jobs = {}
+
+    for job in focused_jobs:
+        for cert in job.certifications.all():
+            impacting_jobs.setdefault(cert.id, set()).add(str(job.id))
+            if cert.id in completed_ids:
+                continue
+
+            gap_counter[cert.name] = gap_counter.get(cert.name, 0) + 1
+            certification_scores.setdefault(cert.id, {
+                "certification": cert,
+                "jobCount": 0,
+                "savedJobCount": 0,
+            })
+            certification_scores[cert.id]["jobCount"] += 1
+            if job.id in saved_job_ids:
+                certification_scores[cert.id]["savedJobCount"] += 1
+
+    progress_lookup = {
+        record.certification_id: record
+        for record in CertificationProgress.objects.select_related("certification").filter(user=user)
+    }
+
+    recommendations = []
+    for cert_id, payload in sorted(
+        certification_scores.items(),
+        key=lambda item: (item[1]["savedJobCount"], item[1]["jobCount"], item[1]["certification"].name),
+        reverse=True,
+    )[:6]:
+        record = progress_lookup.get(cert_id)
+        status = record.status if record else ("planned" if cert_id in in_progress_ids else "not_started")
+        recommendations.append({
+            "id": cert_id,
+            "name": payload["certification"].name,
+            "organization": payload["certification"].organization or "",
+            "jobCount": payload["jobCount"],
+            "savedJobCount": payload["savedJobCount"],
+            "status": status,
+            "why": (
+                f"Appears in {payload['jobCount']} matching job{'s' if payload['jobCount'] != 1 else ''}"
+                + (f", including {payload['savedJobCount']} saved role{'s' if payload['savedJobCount'] != 1 else ''}" if payload["savedJobCount"] else "")
+            ),
+            "impactedJobIds": sorted(list(impacting_jobs.get(cert_id, set()))),
+        })
+
+    applications = JobApplication.objects.select_related("job").filter(user=user)
+    application_counts = {status: 0 for status, _ in JobApplication.STATUS_CHOICES}
+    for application in applications:
+        application_counts[application.status] = application_counts.get(application.status, 0) + 1
+
+    progress_records = CertificationProgress.objects.select_related("certification").filter(user=user).order_by("-updated_at")
+    certification_progress = [{
+        "certificationId": record.certification_id,
+        "name": record.certification.name,
+        "organization": record.certification.organization or "",
+        "status": record.status,
+        "targetCompletionDate": record.target_completion_date.isoformat() if record.target_completion_date else None,
+        "notes": record.notes,
+        "updatedAt": record.updated_at.isoformat(),
+    } for record in progress_records]
+
+    return {
+        "targetRoles": target_roles,
+        "topSkillGaps": [
+            {"name": name, "jobCount": count}
+            for name, count in sorted(gap_counter.items(), key=lambda item: item[1], reverse=True)[:5]
+        ],
+        "recommendedCertifications": recommendations,
+        "certificationProgress": certification_progress,
+        "applicationSummary": application_counts,
+        "stats": {
+            "savedJobs": len(saved_job_ids),
+            "completedCertifications": len(completed_ids),
+            "activeCertificationPlans": len([record for record in progress_records if record.status in {"planned", "in_progress"}]),
+            "applications": applications.count(),
+        },
     }
 
 
@@ -281,7 +495,7 @@ def mdn_popup(request, skill_name):
 # JOBS API
 def get_jobs(request):
     cutoff = timezone.now().date() - timedelta(days=16)
-    jobs = JobPosting.objects.filter(date_posted__gte=cutoff, status="published").order_by('-date_posted')
+    jobs = JobPosting.objects.filter(date_posted__gte=cutoff, status="published").prefetch_related("roles", "certifications").select_related("company").order_by('-date_posted')
 
     role = request.GET.get('role')
     cert = request.GET.get('certification')
@@ -305,19 +519,21 @@ def get_jobs(request):
 
     jobs = jobs.distinct()
 
-    return JsonResponse([serialize_job(job) for job in jobs], safe=False)
+    return JsonResponse([serialize_job(job, request.user) for job in jobs], safe=False)
 
 
 def saved_jobs_api(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
 
-    saved_jobs = SavedJob.objects.select_related("job", "job__company").filter(
+    saved_jobs = SavedJob.objects.select_related("job", "job__company").prefetch_related(
+        "job__roles", "job__certifications"
+    ).filter(
         user=request.user,
         job__status="published",
     ).order_by("-created_at")
 
-    return JsonResponse([serialize_job(record.job) for record in saved_jobs], safe=False)
+    return JsonResponse([serialize_job(record.job, request.user) for record in saved_jobs], safe=False)
 
 
 # REVIEWS API
@@ -733,6 +949,117 @@ def applications_api(request):
 
 
 @csrf_exempt
+@require_http_methods(["PATCH"])
+def application_stage_api(request, application_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    try:
+        application = JobApplication.objects.select_related("job", "job__company").prefetch_related(
+            "job__roles", "job__certifications"
+        ).get(id=application_id, user=request.user)
+    except JobApplication.DoesNotExist:
+        return JsonResponse({"error": "Application not found"}, status=404)
+
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    status = payload.get("status")
+    allowed_statuses = {choice[0] for choice in JobApplication.STATUS_CHOICES}
+    if status and status not in allowed_statuses:
+        return JsonResponse({"error": "Invalid application status"}, status=400)
+
+    if status:
+        application.status = status
+
+    if "notes" in payload:
+        application.notes = (payload.get("notes") or "").strip()
+
+    if "followUpDate" in payload:
+        follow_up_date = parse_date(payload.get("followUpDate") or "")
+        application.follow_up_date = follow_up_date
+
+    application.save()
+    return JsonResponse({"application": serialize_application(application)})
+
+
+def student_dashboard_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    return JsonResponse(build_student_dashboard(request.user))
+
+
+@csrf_exempt
+@require_http_methods(["GET", "PATCH", "DELETE"])
+def certification_progress_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    if request.method == "GET":
+        records = CertificationProgress.objects.select_related("certification").filter(user=request.user).order_by("-updated_at")
+        return JsonResponse([{
+            "certificationId": record.certification_id,
+            "name": record.certification.name,
+            "organization": record.certification.organization or "",
+            "status": record.status,
+            "targetCompletionDate": record.target_completion_date.isoformat() if record.target_completion_date else None,
+            "notes": record.notes,
+            "updatedAt": record.updated_at.isoformat(),
+        } for record in records], safe=False)
+
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    certification_id = payload.get("certificationId")
+    if not certification_id:
+        return JsonResponse({"error": "Certification is required"}, status=400)
+
+    if request.method == "DELETE":
+        CertificationProgress.objects.filter(user=request.user, certification_id=certification_id).delete()
+        return JsonResponse({
+            "deleted": True,
+            "savedItems": serialize_saved_items(request.user),
+            "dashboard": build_student_dashboard(request.user),
+        })
+
+    status = payload.get("status")
+    if not status:
+        return JsonResponse({"error": "Certification and status are required"}, status=400)
+
+    allowed_statuses = {choice[0] for choice in CertificationProgress.STATUS_CHOICES}
+    if status not in allowed_statuses:
+        return JsonResponse({"error": "Invalid certification status"}, status=400)
+
+    try:
+        certification = Certification.objects.get(id=certification_id)
+    except Certification.DoesNotExist:
+        return JsonResponse({"error": "Certification not found"}, status=404)
+
+    record, _ = CertificationProgress.objects.get_or_create(
+        user=request.user,
+        certification=certification,
+        defaults={"status": status},
+    )
+    record.status = status
+    if "notes" in payload:
+        record.notes = (payload.get("notes") or "").strip()
+    if "targetCompletionDate" in payload:
+        record.target_completion_date = parse_date(payload.get("targetCompletionDate") or "")
+    record.save()
+
+    return JsonResponse({
+        "progress": serialize_certification_progress(record),
+        "savedItems": serialize_saved_items(request.user),
+        "dashboard": build_student_dashboard(request.user),
+    })
+
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def toggle_saved_item_api(request):
     if not request.user.is_authenticated:
@@ -996,8 +1323,21 @@ def certifications_api(request):
     if role:
         certifications = certifications.filter(roles__name__icontains=role).distinct()
 
+    progress_lookup = {}
+    recommended_ids = set()
+    if request.user.is_authenticated:
+        progress_lookup = {
+            record.certification_id: record
+            for record in CertificationProgress.objects.filter(user=request.user)
+        }
+        recommended_ids = {
+            item["id"]
+            for item in build_student_dashboard(request.user)["recommendedCertifications"]
+        }
+
     data = []
     for cert in certifications:
+        progress = progress_lookup.get(cert.id)
         data.append({
             "id": cert.id,
             "name": cert.name,
@@ -1006,6 +1346,12 @@ def certifications_api(request):
             "official_url": cert.official_url or "",
             "roles": [r.name for r in cert.roles.all()],
             "job_count": cert.job_count,
+            "recommended": cert.id in recommended_ids,
+            "progress": {
+                "status": progress.status,
+                "targetCompletionDate": progress.target_completion_date.isoformat() if progress.target_completion_date else None,
+                "notes": progress.notes,
+            } if progress else None,
         })
 
     return JsonResponse(data, safe=False)
@@ -1041,6 +1387,22 @@ def certification_detail_api(request, cert_id):
             "date_posted": job.date_posted.strftime("%Y-%m-%d"),
         })
 
+    progress = None
+    recommendation_context = None
+    if request.user.is_authenticated:
+        progress_record = CertificationProgress.objects.filter(user=request.user, certification=cert).first()
+        if progress_record:
+            progress = {
+                "status": progress_record.status,
+                "targetCompletionDate": progress_record.target_completion_date.isoformat() if progress_record.target_completion_date else None,
+                "notes": progress_record.notes,
+            }
+        dashboard = build_student_dashboard(request.user)
+        recommendation_context = next(
+            (item for item in dashboard["recommendedCertifications"] if item["id"] == cert.id),
+            None,
+        )
+
     data = {
         "id": cert.id,
         "name": cert.name,
@@ -1049,6 +1411,8 @@ def certification_detail_api(request, cert_id):
         "official_url": cert.official_url or "",
         "roles": [r.name for r in cert.roles.all()],
         "job_postings": jobs_data,
+        "progress": progress,
+        "recommendationContext": recommendation_context,
     }
 
     return JsonResponse(data, safe=False)

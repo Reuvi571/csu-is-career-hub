@@ -12,6 +12,8 @@ const AlumniPage = lazy(() => import("./pages/AlumniPage").then(m => ({ default:
 const AlumniDetailPage = lazy(() => import("./pages/AlumniDetailPage").then(m => ({ default: m.AlumniDetailPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then(m => ({ default: m.SettingsPage })));
 const SavedJobsPage = lazy(() => import("./pages/SavedJobsPage").then(m => ({ default: m.SavedJobsPage })));
+const SavedCertificationsPage = lazy(() => import("./pages/SavedCertificationsPage").then(m => ({ default: m.SavedCertificationsPage })));
+const LearningPlanPage = lazy(() => import("./pages/LearningPlanPage").then(m => ({ default: m.LearningPlanPage })));
 const ApplicationsPage = lazy(() => import("./pages/ApplicationsPage").then(m => ({ default: m.ApplicationsPage })));
 const DocumentsPage = lazy(() => import("./pages/DocumentsPage").then(m => ({ default: m.DocumentsPage })));
 const AdminPage = lazy(() => import("./pages/AdminPage").then(m => ({ default: m.AdminPage })));
@@ -46,6 +48,8 @@ export const router = createBrowserRouter([
       { path: "alumni/:id", element: <SuspenseWrapper><AlumniDetailPage /></SuspenseWrapper> },
       { path: "settings", element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper> },
       { path: "saved-jobs", element: <SuspenseWrapper><SavedJobsPage /></SuspenseWrapper> },
+      { path: "saved-certifications", element: <SuspenseWrapper><SavedCertificationsPage /></SuspenseWrapper> },
+      { path: "learning-plan", element: <SuspenseWrapper><LearningPlanPage /></SuspenseWrapper> },
       { path: "applications", element: <SuspenseWrapper><ApplicationsPage /></SuspenseWrapper> },
       { path: "documents", element: <SuspenseWrapper><DocumentsPage /></SuspenseWrapper> },
       { path: "admin", element: <SuspenseWrapper><AdminPage /></SuspenseWrapper> },

@@ -104,7 +104,7 @@ export function AuthModal({ open, onOpenChange, onLogin }: AuthModalProps) {
       }
 
       onLogin(data.user);
-      toast.success(`Welcome to CSU IS Careers, ${data.user.name}!`);
+      toast.success(`Welcome to CSU Career Launchpad, ${data.user.name}!`);
       resetForm();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create account");
@@ -126,7 +126,7 @@ export function AuthModal({ open, onOpenChange, onLogin }: AuthModalProps) {
     >
       <DialogContent className="sm:max-w-lg rounded-none">
         <DialogHeader>
-          <DialogTitle>{mode === "signin" ? "Sign in to CSU IS Careers" : "Create your account"}</DialogTitle>
+          <DialogTitle>{mode === "signin" ? "Sign in to CSU Career Launchpad" : "Create your account"}</DialogTitle>
           <DialogDescription>
             {mode === "signin"
               ? "Access saved jobs, profile settings, reviews, and alumni connections."
